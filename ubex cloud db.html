@@ -1,0 +1,2772 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UBEX - Urban Express</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .red-theme {
+            --primary: #dc2626;
+            --primary-dark: #b91c1c;
+            --secondary: #fef2f2;
+        }
+        
+        .green-theme {
+            --primary: #16a34a;
+            --primary-dark: #15803d;
+            --secondary: #f0fdf4;
+        }
+        
+        .theme-primary {
+            background-color: var(--primary, #667eea);
+        }
+        
+        .theme-primary:hover {
+            background-color: var(--primary-dark, #5a67d8);
+        }
+        
+        .theme-secondary {
+            background-color: var(--secondary, #f8fafc);
+        }
+        
+        .receipt-page {
+            width: 105mm;
+            height: 148mm;
+            margin: 0;
+            padding: 10mm;
+            font-size: 10px;
+            line-height: 1.2;
+        }
+        
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .receipt-page, .receipt-page * {
+                visibility: visible;
+            }
+            .receipt-page {
+                position: absolute;
+                left: 0;
+                top: 0;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex items-center justify-between">
+                <div class="fade-in">
+                    <h1 class="text-3xl font-bold">UBEX</h1>
+                    <p class="text-blue-100 text-sm">URBAN EXPRESS</p>
+                    <p class="text-blue-200 text-xs italic">KIRIMAN LOKAL LEBIH TOTAL</p>
+                </div>
+                <div class="text-right fade-in">
+                    <p class="text-sm">Coverage Area:</p>
+                    <p class="text-xs">Bandung • Cimahi • Kab. Bandung</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+   
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md sticky top-0 z-40">
+        <div class="container mx-auto px-4">
+            <div class="flex space-x-1 overflow-x-auto">
+                <button onclick="showPage('sender')" class="nav-btn px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 border-transparent hover:border-blue-500 transition-colors">
+                    📤 Data Pengirim
+                </button>
+                <button onclick="showPage('receiver')" class="nav-btn px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 border-transparent hover:border-blue-500 transition-colors">
+                    📥 Data Penerima
+                </button>
+                <button onclick="showPage('service')" class="nav-btn px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 border-transparent hover:border-blue-500 transition-colors">
+                    🚚 Layanan & Tarif
+                </button>
+                <button onclick="showPage('report')" class="nav-btn px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 border-transparent hover:border-blue-500 transition-colors">
+                    📊 Laporan
+                </button>
+                <button onclick="showPage('settings')" class="nav-btn px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 border-transparent hover:border-blue-500 transition-colors">
+                    ⚙️ Pengaturan
+                </button>
+
+                 <div class="flex-1"></div>
+
+                <!-- Tombol New sejajar -->
+                <button onclick="resetForm(); showPage('sender');" 
+                    class="mr-2 px-4 py-3 text-xs font-semibold text-black bg-gray-100 hover:bg-gray-200 rounded-full shadow-sm transition-all duration-200 flex items-center gap-1">
+                    ✚ <span>New</span>
+                </button>
+ 
+            </div>
+           
+        </div>
+       
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6">
+        <!-- Page 1: Data Pengirim -->
+        <div id="sender-page" class="page-content fade-in">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+               
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    📤 Data Pengirim
+                </h2>
+                <form id="sender-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="md:col-span-2 slide-in">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nama Admin/User *</label>
+                        <input type="text" id="admin-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" required>
+                    </div>
+                    <div class="slide-in">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nama Pengirim *</label>
+                        <input type="text" id="sender-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" required>
+                    </div>
+                    <div class="slide-in">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">No. Telepon *</label>
+                        <input type="tel" id="sender-phone" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" required>
+                    </div>
+                    <div class="md:col-span-2 slide-in">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Alamat Lengkap *</label>
+                        <textarea id="sender-address" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" required></textarea>
+                    </div>
+                    <div class="slide-in">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Kota/Kabupaten *</label>
+                        <select id="sender-city" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" required>
+                            <option value="">Pilih Kota/Kabupaten</option>
+                            <option value="Bandung">Kota Bandung</option>
+                            <option value="Cimahi">Kota Cimahi</option>
+                            <option value="Kabupaten Bandung">Kabupaten Bandung</option>
+                        </select>
+                    </div>
+                    <div class="slide-in">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Kecamatan *</label>
+                        <select id="sender-district" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" required onchange="updateSenderVillages()">
+                            <option value="">Pilih Kecamatan</option>
+                        </select>
+                    </div>
+                    <div class="slide-in">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Kelurahan *</label>
+                        <select id="sender-village" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" required>
+                            <option value="">Pilih Kelurahan</option>
+                        </select>
+                    </div>
+                </form>
+                <div class="mt-6 flex justify-end">
+                    <button onclick="nextPage('receiver')" class="theme-primary text-white px-6 py-2 rounded-md hover:theme-primary transition-colors">
+                        Lanjut ke Data Penerima →
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 2: Data Penerima -->
+        <div id="receiver-page" class="page-content hidden">
+            <div class="bg-white rounded-lg shadow-lg p-6 fade-in">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    📥 Data Penerima
+                </h2>
+                <form id="receiver-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="slide-in">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nama Penerima *</label>
+                        <input type="text" id="receiver-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" required>
+                    </div>
+                    <div class="slide-in">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">No. Telepon *</label>
+                        <input type="tel" id="receiver-phone" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" required>
+                    </div>
+                    <div class="md:col-span-2 slide-in">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Alamat Lengkap *</label>
+                        <textarea id="receiver-address" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" required></textarea>
+                    </div>
+                    <div class="slide-in">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Kota/Kabupaten *</label>
+                        <select id="receiver-city" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" required>
+                            <option value="">Pilih Kota/Kabupaten</option>
+                            <option value="Bandung">Kota Bandung</option>
+                            <option value="Cimahi">Kota Cimahi</option>
+                            <option value="Kabupaten Bandung">Kabupaten Bandung</option>
+                        </select>
+                    </div>
+                    <div class="slide-in">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Kecamatan *</label>
+                        <select id="receiver-district" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" required onchange="updateReceiverVillages()">
+                            <option value="">Pilih Kecamatan</option>
+                        </select>
+                    </div>
+                    <div class="slide-in">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Kelurahan *</label>
+                        <select id="receiver-village" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" required onchange="checkEmbargoStatus()">
+                            <option value="">Pilih Kelurahan</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Embargo Warning -->
+                    <div id="embargo-warning" class="md:col-span-2 slide-in hidden">
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+                            <div class="flex items-center">
+                                <span class="text-xl mr-2">⚠️</span>
+                                <div>
+                                    <strong>Wilayah Embargo!</strong>
+                                    <p class="text-sm">Wilayah tujuan yang dipilih sedang dalam status embargo. Pengiriman ke wilayah ini tidak dapat dilakukan saat ini.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slide-in">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Isi Paket *</label>
+                        <input type="text" id="package-content" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" required>
+                    </div>
+                    <div class="slide-in">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Berat Paket (kg) *</label>
+                        <input type="number" id="package-weight" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" required>
+                    </div>
+                </form>
+                <div class="mt-6 flex justify-between">
+                    <button onclick="showPage('sender')" class="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 transition-colors">
+                        ← Kembali
+                    </button>
+                    <button onclick="nextPage('service')" class="theme-primary text-white px-6 py-2 rounded-md hover:theme-primary transition-colors">
+                        Lanjut ke Layanan →
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 3: Layanan & Tarif -->
+        <div id="service-page" class="page-content hidden">
+            <div class="bg-white rounded-lg shadow-lg p-6 fade-in">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    🚚 Pilihan Layanan & Kalkulasi Ongkir
+                </h2>
+                
+                <!-- Receipt Number and Timestamp -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+                    <div class="slide-in">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">No. Resi</label>
+                        <input type="text" id="receipt-number" readonly class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" placeholder="UBXA0010001">
+                    </div>
+                    <div class="slide-in">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal & Waktu</label>
+                        <input type="text" id="timestamp" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100" readonly>
+                    </div>
+                </div>
+
+                <!-- Package Details -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="slide-in">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Harga Barang (Rp)</label>
+                        <input type="number" id="item-value" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" onchange="calculateTotal()">
+                    </div>
+                    <div class="slide-in">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Dimensi Paket (cm)</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Panjang (P)</label>
+                                <input type="number" id="package-length" min="1" step="0.1" placeholder="30" class="w-full px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-center" onchange="updateVolumeDisplay()">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Lebar (L)</label>
+                                <input type="number" id="package-width" min="1" step="0.1" placeholder="20" class="w-full px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-center" onchange="updateVolumeDisplay()">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Tinggi (T)</label>
+                                <input type="number" id="package-height" min="1" step="0.1" placeholder="10" class="w-full px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-center" onchange="updateVolumeDisplay()">
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <input type="text" id="package-volume" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-center font-medium" readonly placeholder="Volume akan muncul otomatis">
+                        </div>
+                    </div>
+                    <div class="slide-in">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Berat Volume (kg)</label>
+                        <input type="text" id="volume-weight" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100" readonly>
+                    </div>
+                </div>
+                
+                <!-- Service Selection -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                    <div class="service-card border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-blue-500 transition-all slide-in" onclick="selectService('sat-set')">
+                        <div class="flex items-center mb-2">
+                            <input type="radio" name="service" value="sat-set" class="mr-2">
+                            <h3 class="font-bold text-purple-600">UBEX SAT SET</h3>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">Sameday Premium</p>
+                        <p class="text-xs text-gray-500 mb-2">Bandung: Rp 20.000 | Cimahi: Rp 25.000</p>
+                        <p class="text-xs text-green-600">✓ Asuransi max 3jt ✓ Special Handling</p>
+                        <p class="text-xs text-blue-600">Max 5kg (+80% mulai 5.1kg) | Vol: 40x25x25cm</p>
+                    </div>
+                    
+                    <div class="service-card border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-blue-500 transition-all slide-in" onclick="selectService('tuntas')">
+                        <div class="flex items-center mb-2">
+                            <input type="radio" name="service" value="tuntas" class="mr-2">
+                            <h3 class="font-bold text-blue-600">UBEX TUNTAS</h3>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">Sameday Reguler</p>
+                        <p class="text-xs text-gray-500 mb-2">Bandung: Rp 12.000 | Cimahi: Rp 17.000</p>
+                        <p class="text-xs text-green-600" id="tuntas-insurance-text">✓ Asuransi wajib Rp 1.000 (DFOD)</p>
+                        <p class="text-xs text-blue-600">Max 2.7kg (+80% mulai 2.71kg) | Vol: 30x30x15cm</p>
+                    </div>
+                    
+                    <div class="service-card border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-blue-500 transition-all slide-in" onclick="selectService('go-plus')">
+                        <div class="flex items-center mb-2">
+                            <input type="radio" name="service" value="go-plus" class="mr-2">
+                            <h3 class="font-bold text-green-600">UBEX GO+</h3>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">Express H+1 (max 12:00)</p>
+                        <p class="text-xs text-gray-500">Rp 10.000/kg (toleransi 500gr)</p>
+                        <p class="text-xs text-green-600" id="go-plus-insurance-text">✓ Asuransi wajib Rp 1.000 (DFOD)</p>
+                    </div>
+                    
+                    <div class="service-card border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-blue-500 transition-all slide-in" onclick="selectService('go')">
+                        <div class="flex items-center mb-2">
+                            <input type="radio" name="service" value="go" class="mr-2">
+                            <h3 class="font-bold text-orange-600">UBEX GO</h3>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">Reguler H+1</p>
+                        <p class="text-xs text-gray-500">Rp 7.000/kg (toleransi 500gr)</p>
+                        <p class="text-xs text-green-600" id="go-insurance-text">✓ Asuransi wajib Rp 1.000 (DFOD)</p>
+                    </div>
+                    
+                    <div class="service-card border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-blue-500 transition-all slide-in" onclick="selectService('hemat')">
+                        <div class="flex items-center mb-2">
+                            <input type="radio" name="service" value="hemat" class="mr-2">
+                            <h3 class="font-bold text-red-600">UBEX HEMAT</h3>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">Ongkir Murah</p>
+                        <p class="text-xs text-gray-500">Rp 5.000/kg (pembulatan ke atas)</p>
+                        <p class="text-xs text-green-600" id="hemat-insurance-text">✓ Asuransi wajib Rp 1.000 (DFOD)</p>
+                    </div>
+                    
+                    <div class="service-card border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-blue-500 transition-all slide-in" onclick="selectService('maxi')">
+                        <div class="flex items-center mb-2">
+                            <input type="radio" name="service" value="maxi" class="mr-2">
+                            <h3 class="font-bold text-indigo-600">UBEX MAXI</h3>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">Cargo (3-10kg)</p>
+                        <p class="text-xs text-gray-500">Rp 4.000/kg</p>
+                        <p class="text-xs text-green-600" id="maxi-insurance-text">✓ Asuransi wajib Rp 1.000 (DFOD)</p>
+                    </div>
+                </div>
+
+                <!-- Insurance Options -->
+                <div id="insurance-section" class="mb-6 p-4 bg-blue-50 rounded-lg hidden">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Pilihan Asuransi</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="slide-in">
+                            <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-blue-50 transition-all">
+                                <input type="radio" name="insurance" value="yes" class="mr-3" onchange="calculateTotal()">
+                                <div>
+                                    <span class="font-medium text-green-600">Ya, Dengan Asuransi</span>
+                                    <p class="text-xs text-gray-600">Biaya asuransi 0.3% dari harga barang</p>
+                                    <p class="text-xs text-gray-600">Handphone/Elektronik: Rp 10.000 (flat)</p>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="slide-in">
+                            <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-red-50 transition-all">
+                                <input type="radio" name="insurance" value="no" class="mr-3" onchange="calculateTotal()" checked>
+                                <div>
+                                    <span class="font-medium text-red-600">Tidak, Tanpa Asuransi</span>
+                                    <p class="text-xs text-gray-600">Ganti rugi maksimal Rp 99.000</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="is-electronic" class="mr-2" onchange="calculateTotal()">
+                            <span class="text-sm text-gray-700">Barang elektronik/handphone</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Payment & Discount Options -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="slide-in">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Metode Pembayaran</label>
+                        <select id="payment-method" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" onchange="calculateTotal()">
+                            <option value="cash">CASH</option>
+                            <option value="dfod">DFOD (+Rp 1.000)</option>
+                        </select>
+                    </div>
+                    <div class="slide-in">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Diskon (%)</label>
+                        <input type="number" id="discount" min="0" max="100" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" onchange="calculateTotal()">
+                    </div>
+                    <div class="slide-in">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Biaya Asuransi</label>
+                        <div id="insurance-cost" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-sm font-medium text-blue-600">
+                            Rp 0
+                        </div>
+                    </div>
+                    <div class="slide-in">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Total Ongkir</label>
+                        <div id="total-cost" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-lg font-bold text-green-600">
+                            Rp 0
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-between items-center">
+                    <button onclick="showPage('receiver')" class="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 transition-colors">
+                        ← Kembali
+                    </button>
+                    <div class="space-x-2">
+                        <button onclick="saveAndPrintOrder()" class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-colors">
+                            💾 Simpan & Cetak Resi
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 4: Laporan -->
+        <div id="report-page" class="page-content hidden">
+            <div class="bg-white rounded-lg shadow-lg p-6 fade-in">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    📊 Laporan & Database
+                </h2>
+                
+                <!-- Filter Controls -->
+                <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4">🔍 Filter Data</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Mulai</label>
+                            <input type="date" id="filter-start-date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Akhir</label>
+                            <input type="date" id="filter-end-date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Admin/User</label>
+                            <select id="filter-admin" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                                <option value="">Semua Admin</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end space-x-2">
+                            <button onclick="applyFilters()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                                🔍 Filter
+                            </button>
+                            <button onclick="resetFilters()" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors">
+                                🔄 Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+                    <div class="bg-blue-50 p-4 rounded-lg slide-in">
+                        <h3 class="text-sm font-medium text-blue-600">Total Pesanan</h3>
+                        <p class="text-2xl font-bold text-blue-800" id="total-orders">0</p>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg slide-in">
+                        <h3 class="text-sm font-medium text-green-600">Total Pendapatan</h3>
+                        <p class="text-2xl font-bold text-green-800" id="total-revenue">Rp 0</p>
+                    </div>
+                    <div class="bg-yellow-50 p-4 rounded-lg slide-in">
+                        <h3 class="text-sm font-medium text-yellow-600">Pending Pickup</h3>
+                        <p class="text-2xl font-bold text-yellow-800" id="pending-pickup">0</p>
+                    </div>
+                    <div class="bg-yellow-50 p-4 rounded-lg slide-in">
+                        <h3 class="text-sm font-medium text-red-600">Cancelled </h3>
+                        <p class="text-2xl font-bold text-red-800" id="total-cancelled">0</p>
+                    </div>
+                    <div class="bg-orange-50 p-4 rounded-lg slide-in">
+                        <h3 class="text-sm font-medium text-orange-600">Total CASH</h3>
+                        <p class="text-2xl font-bold text-orange-800" id="total-cash">Rp 0</p>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-lg slide-in">
+                        <h3 class="text-sm font-medium text-purple-600">Total DFOD</h3>
+                        <p class="text-2xl font-bold text-purple-800" id="total-dfod">Rp 0</p>
+                    </div>
+                </div>
+
+                <!-- Orders Table -->
+                <div class="overflow-x-auto mb-6">
+                    <table class="w-full border-collapse border border-gray-300 text-sm">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="border border-gray-300 px-2 py-2 text-left">Tanggal</th>
+                                <th class="border border-gray-300 px-2 py-2 text-left">No. Resi</th>
+                                <th class="border border-gray-300 px-2 py-2 text-left">Admin</th>
+                                <th class="border border-gray-300 px-2 py-2 text-left">Pengirim</th>
+                                <th class="border border-gray-300 px-2 py-2 text-left">Penerima</th>
+                                <th class="border border-gray-300 px-2 py-2 text-left">Alamat Tujuan</th>
+                                <th class="border border-gray-300 px-2 py-2 text-left">Isi Paket</th>
+                                <th class="border border-gray-300 px-2 py-2 text-left">Berat</th>
+                                <th class="border border-gray-300 px-2 py-2 text-left">Layanan</th>
+                                <th class="border border-gray-300 px-2 py-2 text-left">Pembayaran</th>
+                                <th class="border border-gray-300 px-2 py-2 text-left">Ongkir</th>
+                                 <th class="border border-gray-300 px-2 py-2 text-left">Status</th>
+                                <th class="border border-gray-300 px-2 py-2 text-left">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-table">
+                            <tr>
+                                <td colspan="12" class="border border-gray-300 px-4 py-8 text-center text-gray-500">
+                                    Belum ada data pesanan
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex space-x-2">
+                    <button onclick="printManifest()" class="theme-primary text-white px-6 py-2 rounded-md hover:theme-primary transition-colors">
+                        🖨️ Cetak Manifest Kurir
+                    </button>
+                    <button onclick="printDatabase()" class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-colors">
+                        🖨️ Print Database
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 5: Settings -->
+        <div id="settings-page" class="page-content hidden">
+            <div class="bg-white rounded-lg shadow-lg p-6 fade-in">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    ⚙️ Pengaturan Sistem
+                </h2>
+                
+                <!-- Theme Settings -->
+                <div class="mb-8 slide-in">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Tema Warna</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="theme-option border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-blue-500 transition-all" onclick="setTheme('default')">
+                            <div class="flex items-center mb-2">
+                                <input type="radio" name="theme" value="default" class="mr-2" checked>
+                                <span class="font-medium">Biru (Default)</span>
+                            </div>
+                            <div class="flex space-x-2">
+                                <div class="w-6 h-6 bg-blue-500 rounded"></div>
+                                <div class="w-6 h-6 bg-blue-100 rounded"></div>
+                            </div>
+                        </div>
+                        <div class="theme-option border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-red-500 transition-all" onclick="setTheme('red')">
+                            <div class="flex items-center mb-2">
+                                <input type="radio" name="theme" value="red" class="mr-2">
+                                <span class="font-medium">Merah Putih</span>
+                            </div>
+                            <div class="flex space-x-2">
+                                <div class="w-6 h-6 bg-red-600 rounded"></div>
+                                <div class="w-6 h-6 bg-red-50 rounded"></div>
+                            </div>
+                        </div>
+                        <div class="theme-option border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-green-500 transition-all" onclick="setTheme('green')">
+                            <div class="flex items-center mb-2">
+                                <input type="radio" name="theme" value="green" class="mr-2">
+                                <span class="font-medium">Hijau Putih</span>
+                            </div>
+                            <div class="flex space-x-2">
+                                <div class="w-6 h-6 bg-green-600 rounded"></div>
+                                <div class="w-6 h-6 bg-green-50 rounded"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Insurance Settings -->
+                <div class="mb-8 slide-in">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Pengaturan Asuransi Wajib</h3>
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h4 class="font-medium text-gray-800">Asuransi Wajib Rp 1.000 (Khusus DFOD)</h4>
+                                <p class="text-sm text-gray-600">Proteksi kehilangan paket dengan maksimal klaim Rp 300.000</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="mandatory-insurance-toggle" class="sr-only peer" checked onchange="toggleMandatoryInsurance()">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                            </label>
+                        </div>
+                        <div class="text-xs text-gray-500">
+                            <p><strong>Berlaku untuk layanan:</strong> UBEX TUNTAS, UBEX GO+, UBEX GO, UBEX HEMAT, UBEX MAXI</p>
+                            <p><strong>Syarat:</strong> Hanya berlaku untuk pembayaran DFOD (Destination Fee on Delivery)</p>
+                            <p><strong>Tidak berlaku untuk:</strong> UBEX SAT SET (sudah termasuk asuransi hingga 3 juta) & pembayaran CASH</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Embargo Settings -->
+                <div class="slide-in">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Pengaturan Embargo Wilayah Tujuan</h3>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Pilih Kota untuk Pengaturan Embargo</label>
+                        <select id="embargo-city" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" onchange="loadEmbargoDistricts()">
+                            <option value="">Pilih Kota</option>
+                            <option value="Bandung">Kota Bandung</option>
+                            <option value="Cimahi">Kota Cimahi</option>
+                            <option value="Kabupaten Bandung">Kabupaten Bandung</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-medium text-gray-600 mb-3">Kecamatan</h4>
+                            <div id="embargo-districts" class="space-y-2 max-h-60 overflow-y-auto border border-gray-200 rounded p-3">
+                                <p class="text-gray-500 text-sm">Pilih kota terlebih dahulu</p>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-gray-600 mb-3">Kelurahan</h4>
+                            <div id="embargo-villages" class="space-y-2 max-h-60 overflow-y-auto border border-gray-200 rounded p-3">
+                                <p class="text-gray-500 text-sm">Pilih kecamatan terlebih dahulu</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex space-x-2">
+                        <button onclick="toggleAllDistricts(true)" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors text-sm">
+                            ✓ Buka Semua Kecamatan
+                        </button>
+                        <button onclick="toggleAllDistricts(false)" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors text-sm">
+                            ✗ Tutup Semua Kecamatan
+                        </button>
+                        <button onclick="saveEmbargoSettings()" class="theme-primary text-white px-6 py-2 rounded-md hover:theme-primary transition-colors">
+                            💾 Simpan Pengaturan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Global variables
+
+        const API_BASE_URL = 'https://isalubex-production.up.railway.app/api';  
+        let currentPage = 'sender';
+        const pages = ['sender', 'receiver', 'service', 'report', 'settings'];
+        //let orders = JSON.parse(localStorage.getItem('ubex-orders') || '[]');
+        let filteredOrders = [];
+        let currentTheme = localStorage.getItem('ubex-theme') || 'default';
+        let embargoSettings = JSON.parse(localStorage.getItem('ubex-embargo') || '{}');
+        let mandatoryInsuranceEnabled = JSON.parse(localStorage.getItem('ubex-mandatory-insurance') || 'true');
+        let orders = [];
+
+        // Complete area database
+        const areaDatabase = {
+            "Bandung": {
+                "Andir": ["Campaka", "Ciroyom", "Dungus Cariang", "Garuda", "Kebon Jeruk", "Maleber", "Pajajaran"],
+                "Astana Anyar": ["Cibadak", "Karanganyar", "Karasak", "Nyengseret", "Panjunan", "Pelindung Hewan"],
+                "Antapani": ["Antapani Kidul", "Antapani Kulon", "Antapani Tengah", "Antapani Wetan"],
+                "Arcamanik": ["Cisaranten Bina Harapan", "Cisaranten Endah", "Cisaranten Kulon", "Sukamiskin"],
+                "Babakan Ciparay": ["Babakan", "Babakan Ciparay", "Cirangrang", "Margahayu Utara", "Margasuka", "Sukahaji"],
+                "Bandung Kidul": ["Batununggal", "Kujangsari", "Mengger", "Wates"],
+                "Bandung Kulon": ["Caringin", "Cibuntu", "Cigondewah Kaler", "Cigondewah Kidul", "Cigondewah Rahayu", "Warung Muncang"],
+                "Bandung Wetan": ["Cihapit", "Citarum", "Tamansari"],
+                "Batununggal": ["Binong", "Cibangkong", "Gumuruh", "Kacapiring", "Kebongedang", "Kebonwaru", "Maleer", "Samoja"],
+                "Bojongloa Kaler": ["Babakan Asih", "Babakan Tarogong", "Jamika", "Kopo", "Suka Asih"],
+                "Bojongloa Kidul": ["Kebon Lega", "Mekarwangi", "Situsaeur"],
+                "Buahbatu": ["Cijawura", "Jatisari", "Margasari", "Sekejati"],
+                "Cibeunying Kaler": ["Cigadung", "Cihaur Geulis", "Neglasari", "Sukaluyu"],
+                "Cibeunying Kidul": ["Cikutra", "Padasuka", "Pasirlayung", "Sukamaju", "Sukamulya"],
+                "Cibiru": ["Cipadung", "Cisurupan", "Palasari", "Pasirbiru"],
+                "Cicendo": ["Arjuna", "Husen Sastranegara", "Pajajaran", "Pamoyanan", "Pasirkaliki", "Sukaraja"],
+                "Cidadap": ["Ciumbuleuit", "Hegarmanah", "Ledeng"],
+                "Cinambo": ["Babakan Penghulu", "Cisaranten Wetan", "Pakemitan", "Sukamulya"],
+                "Coblong": ["Cipaganti", "Dago", "Lebak Gede", "Lebak Siliwangi", "Sadang Serang", "Sekeloa"],
+                "Gedebage": ["Cisaranten Kidul", "Rancabolang", "Rancanumpang"],
+                "Kiaracondong": ["Babakan Sari", "Babakan Surabaya", "Cicaheum", "Kebon Kangkung", "Kebon Jayanti", "Sukapura"],
+                "Lengkong": ["Burangrang", "Cijagra", "Cikawao", "Lingkar Selatan", "Malabar", "Paledang", "Turangga"],
+                "Mandalajati": ["Jatihandap", "Karang Pamulang", "Pasir Impun", "Sindang Jaya"],
+                "Panyileukan": ["Cipadung Kidul", "Cipadung Kulon", "Cipadung Wetan", "Mekarmulya"],
+                "Rancasari": ["Derwati", "Manjahlega", "Rancasari"],
+                "Regol": ["Ancol", "Balonggede", "Ciateul", "Cigereleng", "Ciseureuh", "Pasirluyu", "Pungkur"],
+                "Sukajadi": ["Cipedes", "Pasteur", "Sukabungah", "Sukagalih", "Sukawarna"],
+                "Sukasari": ["Gegerkalong", "Isola", "Sarijadi", "Sukarasa"],
+                "Sumur Bandung": ["Braga", "Kebon Pisang", "Merdeka", "Sumur Bandung"],
+                "Ujung Berung": ["Cigending", "Pasanggrahan", "Pasir Endah", "Ujung Berung"]
+            },
+            "Cimahi": {
+                "Cimahi Utara": ["Cibabat", "Cibeber", "Citeureup", "Karang Mekar", "Pasir Kaliki"],
+                "Cimahi Tengah": ["Baros", "Cimahi", "Setiamanah"],
+                "Cimahi Selatan": ["Cibeureum", "Leuwigajah", "Melong", "Utama"]
+            },
+            "Kabupaten Bandung": {
+                "Arjasari": ["Arjasari", "Baros", "Mekar Rahayu", "Rancakole", "Wargamekar"],
+                "Baleendah": ["Andir", "Baleendah", "Bojongmalaka", "Jelekong", "Manggahang", "Rancamanyar", "Wargamekar"],
+                "Banjaran": ["Banjaran", "Banjaran Wetan", "Ciapus", "Margahurip", "Neglawangi", "Sindangpanon", "Tarajusari"],
+                "Bojongsoang": ["Bojongsoang", "Buahbatu", "Lengkong", "Rancaekek Wetan", "Tegalluar"],
+                "Cangkuang": ["Cangkuang", "Jatisari", "Nagrak", "Pananjung", "Tanjungsari"],
+                "Cicalengka": ["Cicalengka Kulon", "Cicalengka Wetan", "Cikuya", "Dampit", "Margaasih", "Narawita", "Panenjoan", "Tanjungwangi"],
+                "Cikancung": ["Cikancung", "Hegarmanah", "Mandalahaji", "Mandalamekar", "Panyadap"],
+                "Cilengkrang": ["Cilengkrang", "Cipanjalu", "Girimekar", "Jatiendah", "Jatiroke", "Mekarmanik"],
+                "Cileunyi": ["Cibiru Hilir", "Cibiru Wetan", "Cileunyi Kulon", "Cileunyi Wetan", "Cinunuk"],
+                "Cimaung": ["Campaka Mulya", "Cimaung", "Jagabaya", "Malasari", "Pasirhuni", "Sukamaju", "Warjabakti"],
+                "Cimenyan": ["Ciburial", "Cimenyan", "Mandalamekar", "Mekar Mulya"],
+                "Ciparay": ["Bumiwangi", "Ciparay", "Gununghalu", "Manggungharja", "Mekarsaluyu", "Pakutandang", "Sarimahi", "Serangmekar"],
+                "Ciwidey": ["Alamendah", "Ciwidey", "Lebakmuncang", "Panundaan", "Panyocokan", "Rawabogo", "Sukawening"],
+                "Dayeuhkolot": ["Cangkuang Kulon", "Citeureup", "Dayeuhkolot", "Pasawahan", "Sukapura"],
+                "Ibun": ["Cibeet", "Dukuh", "Ibun", "Karyalaksana", "Lampegan", "Laksana", "Meninjo", "Neglawangi", "Pangguh", "Sudi", "Talun", "Tanggulun"],
+                "Katapang": ["Cilampeni", "Gandasari", "Katapang", "Pangauban", "Sangkanhurip", "Setiamulya", "Sukamukti"],
+                "Kertasari": ["Cihawuk", "Cikembang", "Jingglong", "Kertasari", "Neglawangi", "Santosa", "Sukapura", "Tarumajaya"],
+                "Kutawaringin": ["Buninagara", "Cilame", "Gadobangkong", "Jatisari", "Kutawaringin", "Pameuntasan", "Sukamulih"],
+                "Majalaya": ["Biru", "Majalaya", "Majasetra", "Neglasari", "Padamulya", "Sukamaju", "Warnasari"],
+                "Margaasih": ["Lagadar", "Margaasih", "Mekar Rahayu", "Nanjung", "Rahayu"],
+                "Margahayu": ["Margahayu Selatan", "Margahayu Tengah", "Margahayu Utara", "Sayati"],
+                "Nagreg": ["Ciherang", "Cikoneng", "Mandalasari", "Nagreg", "Neglawangi", "Rancaekek Kulon"],
+                "Pacet": ["Ciherang", "Cipanas", "Mandalahaji", "Maruyung", "Pacet", "Pangalengan", "Sukarame"],
+                "Pameungpeuk": ["Banjarsari", "Langensari", "Pameungpeuk", "Rancabogo", "Sukasari"],
+                "Pangalengan": ["Banjarsari", "Lamajang", "Margaluyu", "Margamukti", "Pangalengan", "Pulosari", "Sukaluyu", "Tribaktimulya", "Wanasuka"],
+                "Paseh": ["Cibitung", "Cijagra", "Drawati", "Loa", "Mekarmukti", "Paseh", "Sindangsari", "Sukamantri"],
+                "Pasirjambu": ["Cibodas", "Cisondari", "Flamboyant", "Pasirjambu", "Singajaya"],
+                "Rancabali": ["Alamendah", "Lebaksiuh", "Patengan", "Rancabali", "Sukaresmi"],
+                "Rancaekek": ["Bojongsalam", "Cangkuang Wetan", "Jelegong", "Linggar", "Nanjungmekar", "Rancaekek Kulon", "Rancaekek Wetan", "Solokanjeruk"],
+                "Soreang": ["Karamatmulya", "Parungponteng", "Panyileukan", "Soreang", "Sukanagara"],
+                "Solokanjeruk": ["Jelegong", "Langensari", "Rancaekek Kulon", "Solokanjeruk"],
+                "Cipatat": ["Cipatat", "Kertamukti", "Mandalasari", "Nyalindung", "Sarimulya", "Sumurbandung"],
+                "Padalarang": ["Cimerang", "Cipendeuy", "Kertajaya", "Padalarang", "Tagogapu"],
+                "Ngamprah": ["Cimanggu", "Cilame", "Mekarsari", "Ngamprah", "Pakuhaji", "Sukatani", "Tanimulya"],
+                "Cisarua": ["Cipongkor", "Cisarua", "Jambudipa", "Kertawangi", "Pasirhalang", "Tugumukti"],
+                "Lembang": ["Cibodas", "Cikole", "Gudangkahuripan", "Jayagiri", "Langensari", "Lembang", "Mekarwangi", "Pagerwangi", "Sukajaya", "Wangunharja"],
+                "Parongpong": ["Cihanjuang", "Cihanjuang Rahayu", "Ciwaruga", "Parongpong", "Sariwangi"]
+            }
+        };
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            filteredOrders = [...orders];
+            setTheme(currentTheme);
+            updateReportSummary();
+            updateOrdersTable();
+            populateAdminFilter();
+            initializeAreaSelectors();
+            //generateReceiptNumber();
+            updateTimestamp();
+            
+            // Initialize insurance toggle
+            document.getElementById('mandatory-insurance-toggle').checked = mandatoryInsuranceEnabled;
+            updateInsuranceTexts();
+            
+            // Add some test embargo areas for demonstration
+            if (Object.keys(embargoSettings).length === 0) {
+                embargoSettings = {
+                    "Bandung": {
+                        "Andir": {
+                            "enabled": true,
+                            "Campaka": { "enabled": false }, // This area is embargoed
+                            "Ciroyom": { "enabled": true },
+                            "Dungus Cariang": { "enabled": true },
+                            "Garuda": { "enabled": true },
+                            "Kebon Jeruk": { "enabled": true },
+                            "Maleber": { "enabled": true },
+                            "Pajajaran": { "enabled": true }
+                        },
+                        "Cicendo": {
+                            "enabled": true,
+                            "Arjuna": { "enabled": true },
+                            "Husen Sastranegara": { "enabled": false }, // This area is embargoed
+                            "Pajajaran": { "enabled": true },
+                            "Pamoyanan": { "enabled": true },
+                            "Pasirkaliki": { "enabled": true },
+                            "Sukaraja": { "enabled": true }
+                        }
+                    }
+                };
+                localStorage.setItem('ubex-embargo', JSON.stringify(embargoSettings));
+            }
+            
+            // Update timestamp every second
+            setInterval(updateTimestamp, 1000);
+        });
+
+        // Area management functions
+        function initializeAreaSelectors() {
+            updateSenderDistricts();
+            updateReceiverDistricts();
+        }
+
+        function updateSenderDistricts() {
+            const city = document.getElementById('sender-city').value;
+            const districtSelect = document.getElementById('sender-district');
+            const villageSelect = document.getElementById('sender-village');
+            
+            districtSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
+            villageSelect.innerHTML = '<option value="">Pilih Kelurahan</option>';
+            
+            if (city && areaDatabase[city]) {
+                Object.keys(areaDatabase[city]).forEach(district => {
+                    const option = document.createElement('option');
+                    option.value = district;
+                    option.textContent = district;
+                    districtSelect.appendChild(option);
+                });
+            }
+        }
+
+        function updateSenderVillages() {
+            const city = document.getElementById('sender-city').value;
+            const district = document.getElementById('sender-district').value;
+            const villageSelect = document.getElementById('sender-village');
+            
+            villageSelect.innerHTML = '<option value="">Pilih Kelurahan</option>';
+            
+            if (city && district && areaDatabase[city] && areaDatabase[city][district]) {
+                areaDatabase[city][district].forEach(village => {
+                    const option = document.createElement('option');
+                    option.value = village;
+                    option.textContent = village;
+                    villageSelect.appendChild(option);
+                });
+            }
+        }
+
+        function updateReceiverDistricts() {
+            const city = document.getElementById('receiver-city').value;
+            const districtSelect = document.getElementById('receiver-district');
+            const villageSelect = document.getElementById('receiver-village');
+            
+            districtSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
+            villageSelect.innerHTML = '<option value="">Pilih Kelurahan</option>';
+            
+            if (city && areaDatabase[city]) {
+                Object.keys(areaDatabase[city]).forEach(district => {
+                    const option = document.createElement('option');
+                    option.value = district;
+                    option.textContent = district;
+                    districtSelect.appendChild(option);
+                });
+            }
+        }
+
+        function updateReceiverVillages() {
+            const city = document.getElementById('receiver-city').value;
+            const district = document.getElementById('receiver-district').value;
+            const villageSelect = document.getElementById('receiver-village');
+            
+            villageSelect.innerHTML = '<option value="">Pilih Kelurahan</option>';
+            
+            if (city && district && areaDatabase[city] && areaDatabase[city][district]) {
+                areaDatabase[city][district].forEach(village => {
+                    const option = document.createElement('option');
+                    option.value = village;
+                    option.textContent = village;
+                    villageSelect.appendChild(option);
+                });
+            }
+            
+            // Check embargo status when district changes
+            checkEmbargoStatus();
+        }
+
+        // Add event listeners for city changes
+        document.addEventListener('change', function(e) {
+            if (e.target.id === 'sender-city') {
+                updateSenderDistricts();
+            } else if (e.target.id === 'receiver-city') {
+                updateReceiverDistricts();
+            }
+        });
+
+        // Check embargo status
+        function checkEmbargoStatus() {
+            const city = document.getElementById('receiver-city').value;
+            const district = document.getElementById('receiver-district').value;
+            const village = document.getElementById('receiver-village').value;
+            const warningDiv = document.getElementById('embargo-warning');
+            
+            if (!city || !district || !village) {
+                warningDiv.classList.add('hidden');
+                return false;
+            }
+            
+            // Check if area is embargoed - default is enabled (not embargoed)
+            // Area is embargoed only if explicitly set to enabled: false
+            let isEmbargoed = false;
+            
+            if (embargoSettings[city] && embargoSettings[city][district] && embargoSettings[city][district][village]) {
+                isEmbargoed = embargoSettings[city][district][village].enabled === false;
+            }
+            
+            if (isEmbargoed) {
+                warningDiv.classList.remove('hidden');
+                return true;
+            } else {
+                warningDiv.classList.add('hidden');
+                return false;
+            }
+        }
+
+        // Page navigation
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page-content').forEach(page => {
+                page.classList.add('hidden');
+            });
+            
+            // Show selected page
+              document.getElementById(pageId + '-page').classList.remove('hidden');
+                     
+            // Update navigation
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('border-blue-500', 'text-blue-600');
+            });
+            event.target.classList.add('border-blue-500', 'text-blue-600');
+            
+            currentPage = pageId;
+            pages.forEach(page => {
+
+               const element = document.getElementById(`${page}-page`);
+
+                if (element) {
+                    console.log('element', element);
+                if (page === pageId) {
+                        if (pageId === 'report') {
+                            fetchOrdersAndSummary();
+                            populateAdminFilter();
+                        }
+                    }
+                }    
+            }  )
+
+        }
+
+        function nextPage(pageId) {
+            if (validateCurrentPage()) {
+                showPage(pageId);
+            }
+        }
+
+        function validateCurrentPage() {
+            if (currentPage === 'sender') {
+                const required = ['admin-name', 'sender-name', 'sender-phone', 'sender-address', 'sender-city', 'sender-district', 'sender-village'];
+                return required.every(id => document.getElementById(id).value.trim() !== '');
+            } else if (currentPage === 'receiver') {
+                const required = ['receiver-name', 'receiver-phone', 'receiver-address', 'receiver-city', 'receiver-district', 'receiver-village', 'package-content', 'package-weight'];
+                return required.every(id => document.getElementById(id).value.trim() !== '');
+            }
+            return true;
+        }
+
+        // Embargo management functions
+        function loadEmbargoDistricts() {
+            const city = document.getElementById('embargo-city').value;
+            const districtsDiv = document.getElementById('embargo-districts');
+            const villagesDiv = document.getElementById('embargo-villages');
+            
+            if (!city || !areaDatabase[city]) {
+                districtsDiv.innerHTML = '<p class="text-gray-500 text-sm">Pilih kota terlebih dahulu</p>';
+                villagesDiv.innerHTML = '<p class="text-gray-500 text-sm">Pilih kecamatan terlebih dahulu</p>';
+                return;
+            }
+            
+            const districts = Object.keys(areaDatabase[city]);
+            districtsDiv.innerHTML = districts.map(district => {
+                const isEnabled = !embargoSettings[city] || !embargoSettings[city][district] || embargoSettings[city][district].enabled !== false;
+                return `
+                    <label class="flex items-center p-2 hover:bg-gray-50 rounded">
+                        <input type="checkbox" class="mr-2 district-checkbox" 
+                               data-city="${city}" data-district="${district}" 
+                               ${isEnabled ? 'checked' : ''} 
+                               onchange="toggleDistrict('${city}', '${district}', this.checked)">
+                        <span class="text-sm">${district}</span>
+                    </label>
+                `;
+            }).join('');
+            
+            villagesDiv.innerHTML = '<p class="text-gray-500 text-sm">Pilih kecamatan untuk melihat kelurahan</p>';
+        }
+
+        function toggleDistrict(city, district, enabled) {
+            if (!embargoSettings[city]) embargoSettings[city] = {};
+            if (!embargoSettings[city][district]) embargoSettings[city][district] = {};
+            
+            embargoSettings[city][district].enabled = enabled;
+            
+            // Update villages for this district
+            const villages = areaDatabase[city][district];
+            villages.forEach(village => {
+                if (!embargoSettings[city][district][village]) {
+                    embargoSettings[city][district][village] = {};
+                }
+                embargoSettings[city][district][village].enabled = enabled;
+            });
+            
+            updateEmbargoVillages(city, district);
+        }
+
+        function updateEmbargoVillages(city, district) {
+            const villagesDiv = document.getElementById('embargo-villages');
+            
+            if (!city || !district || !areaDatabase[city] || !areaDatabase[city][district]) {
+                villagesDiv.innerHTML = '<p class="text-gray-500 text-sm">Pilih kecamatan terlebih dahulu</p>';
+                return;
+            }
+            
+            const villages = areaDatabase[city][district];
+            villagesDiv.innerHTML = villages.map(village => {
+                const isEnabled = !embargoSettings[city] || !embargoSettings[city][district] || !embargoSettings[city][district][village] || embargoSettings[city][district][village].enabled !== false;
+                return `
+                    <label class="flex items-center p-2 hover:bg-gray-50 rounded">
+                        <input type="checkbox" class="mr-2 village-checkbox" 
+                               data-city="${city}" data-district="${district}" data-village="${village}"
+                               ${isEnabled ? 'checked' : ''} 
+                               onchange="toggleVillage('${city}', '${district}', '${village}', this.checked)">
+                        <span class="text-sm">${village}</span>
+                    </label>
+                `;
+            }).join('');
+        }
+
+        function toggleVillage(city, district, village, enabled) {
+            if (!embargoSettings[city]) embargoSettings[city] = {};
+            if (!embargoSettings[city][district]) embargoSettings[city][district] = {};
+            if (!embargoSettings[city][district][village]) embargoSettings[city][district][village] = {};
+            
+            embargoSettings[city][district][village].enabled = enabled;
+        }
+
+        function toggleAllDistricts(enable) {
+            const city = document.getElementById('embargo-city').value;
+            if (!city || !areaDatabase[city]) {
+                alert('Pilih kota terlebih dahulu!');
+                return;
+            }
+            
+            const districts = Object.keys(areaDatabase[city]);
+            districts.forEach(district => {
+                toggleDistrict(city, district, enable);
+            });
+            
+            // Update checkboxes
+            document.querySelectorAll('.district-checkbox').forEach(checkbox => {
+                checkbox.checked = enable;
+            });
+            
+            document.querySelectorAll('.village-checkbox').forEach(checkbox => {
+                checkbox.checked = enable;
+            });
+        }
+
+        // Add event listener for district selection in embargo
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('district-checkbox')) {
+                const city = e.target.dataset.city;
+                const district = e.target.dataset.district;
+                updateEmbargoVillages(city, district);
+            }
+        });
+
+        // Receipt number management
+        //let currentReceiptNumber = generateReceiptNumber();
+
+        async function generateReceiptNumber() {
+            const now = new Date();
+            const year = String(now.getFullYear()).slice(2, 4);
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+
+            let formattedCounter = '';
+            try {
+                // Panggil API backend untuk mendapatkan counter unik          
+
+                const response = await fetch(`${API_BASE_URL}/next-receipt-counter`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const counter = data.counter;
+                formattedCounter = String(counter).padStart(4, '0'); // Format counter menjadi 4 digit
+            } catch (error) {
+                console.error("Error fetching receipt counter:", error);
+                alert("Failed to generate receipt number. Please try again.");
+                return; // Hentikan jika gagal mendapatkan counter
+            }
+
+            const receiptNumber = `UBX${year}${month}${day}${hours}${minutes}${seconds}${formattedCounter}`;
+            document.getElementById('receipt-number').value = receiptNumber;
+        }
+
+        function incrementReceiptNumber() {
+            currentReceiptNumber++;
+            localStorage.setItem('ubex-receipt-counter', currentReceiptNumber.toString());
+            generateReceiptNumber();
+        }
+
+        function updateTimestamp() {
+            const now = new Date();
+            const timestamp = now.toLocaleString('id-ID', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('timestamp').value = timestamp;
+        }
+
+        // Volume management functions
+        function updateVolumeDisplay() {
+            const length = parseFloat(document.getElementById('package-length').value || 0);
+            const width = parseFloat(document.getElementById('package-width').value || 0);
+            const height = parseFloat(document.getElementById('package-height').value || 0);
+            const volumeField = document.getElementById('package-volume');
+            
+            if (length > 0 && width > 0 && height > 0) {
+                volumeField.value = `${length} x ${width} x ${height}`;
+                calculateVolumeWeight();
+                validateVolumeLimits();
+            } else {
+                volumeField.value = '';
+                document.getElementById('volume-weight').value = '';
+            }
+        }
+
+        function validateVolumeLimits() {
+            const length = parseFloat(document.getElementById('package-length').value || 0);
+            const width = parseFloat(document.getElementById('package-width').value || 0);
+            const height = parseFloat(document.getElementById('package-height').value || 0);
+            const service = document.querySelector('input[name="service"]:checked')?.value;
+            
+            let maxDimensions = null;
+            let serviceName = '';
+            
+            if (service === 'sat-set') {
+                maxDimensions = { length: 40, width: 25, height: 25 };
+                serviceName = 'UBEX SAT SET';
+            } else if (service === 'tuntas') {
+                maxDimensions = { length: 30, width: 30, height: 15 };
+                serviceName = 'UBEX TUNTAS';
+            }
+            
+            if (maxDimensions && (length > 0 || width > 0 || height > 0)) {
+                const exceedsLimit = length > maxDimensions.length || 
+                                   width > maxDimensions.width || 
+                                   height > maxDimensions.height;
+                
+                // Remove existing warning
+                const existingWarning = document.getElementById('volume-warning');
+                if (existingWarning) {
+                    existingWarning.remove();
+                }
+                
+                if (exceedsLimit) {
+                    const warning = document.createElement('div');
+                    warning.id = 'volume-warning';
+                    warning.className = 'mt-2 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm';
+                    warning.innerHTML = `
+                        <div class="flex items-center">
+                            <span class="text-lg mr-2">⚠️</span>
+                            <div>
+                                <strong>Volume melebihi batas ${serviceName}!</strong>
+                                <p class="text-xs mt-1">Maksimal: ${maxDimensions.length}x${maxDimensions.width}x${maxDimensions.height}cm</p>
+                                <p class="text-xs">Saat ini: ${length}x${width}x${height}cm</p>
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('package-volume').parentNode.appendChild(warning);
+                }
+            }
+        }
+
+        // Volume weight calculation
+        function calculateVolumeWeight() {
+            const length = parseFloat(document.getElementById('package-length').value || 0);
+            const width = parseFloat(document.getElementById('package-width').value || 0);
+            const height = parseFloat(document.getElementById('package-height').value || 0);
+            const volumeWeightField = document.getElementById('volume-weight');
+            
+            if (length > 0 && width > 0 && height > 0) {
+                const volumeWeight = (length * width * height) / 5000;
+                volumeWeightField.value = volumeWeight.toFixed(2);
+                
+                // Update actual weight if volume weight is higher
+                const actualWeight = parseFloat(document.getElementById('package-weight').value || 0);
+                if (volumeWeight > actualWeight) {
+                    document.getElementById('package-weight').value = volumeWeight.toFixed(2);
+                }
+                
+                calculateTotal();
+            } else {
+                volumeWeightField.value = '';
+            }
+        }
+
+        // Insurance calculation
+        function calculateInsuranceCost() {
+            const service = document.querySelector('input[name="service"]:checked')?.value;
+            const insurance = document.querySelector('input[name="insurance"]:checked')?.value;
+            const itemValue = parseFloat(document.getElementById('item-value')?.value || 0);
+            const isElectronic = document.getElementById('is-electronic')?.checked;
+            
+            if (service === 'sat-set' || insurance === 'no' || itemValue === 0) {
+                return 0;
+            }
+            
+            if (isElectronic) {
+                return 10000; // Flat rate for electronics
+            }
+            
+            return Math.round(itemValue * 0.003); // 0.3% of item value
+        }
+
+        // Service selection and calculation
+        function selectService(serviceType) {
+            document.querySelectorAll('.service-card').forEach(card => {
+                card.classList.remove('border-blue-500', 'bg-blue-50');
+            });
+            event.currentTarget.classList.add('border-blue-500', 'bg-blue-50');
+            
+            document.querySelector(`input[value="${serviceType}"]`).checked = true;
+            
+            // Show/hide insurance section
+            const insuranceSection = document.getElementById('insurance-section');
+            if (serviceType === 'sat-set') {
+                insuranceSection.classList.add('hidden');
+            } else {
+                insuranceSection.classList.remove('hidden');
+            }
+            
+            // Validate volume limits for selected service
+            validateVolumeLimits();
+            
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            const service = document.querySelector('input[name="service"]:checked')?.value;
+            const weight = parseFloat(document.getElementById('package-weight')?.value || 0);
+            const receiverCity = document.getElementById('receiver-city')?.value;
+            const paymentMethod = document.getElementById('payment-method')?.value;
+            const discount = parseFloat(document.getElementById('discount')?.value || 0);
+            
+            let cost = 0;
+            
+            if (service && weight > 0) {
+                switch (service) {
+                    case 'sat-set':
+                        const baseCostSatSet = receiverCity === 'Cimahi' ? 25000 : 20000;
+                        cost = baseCostSatSet;
+                        
+                        // Additional cost for weight 5.1kg or more (80% of base rate per kg)
+                        if (weight >= 5.1) {
+                            const excessWeight = weight - 5;
+                            const additionalCost = Math.ceil(excessWeight) * (baseCostSatSet * 0.8);
+                            cost += additionalCost;
+                        }
+                        break;
+                        
+                    case 'tuntas':
+                        const baseCostTuntas = receiverCity === 'Cimahi' ? 17000 : 12000;
+                        cost = baseCostTuntas;
+                        
+                        // Additional cost for weight 2.71kg or more (80% of base rate per kg)
+                        if (weight >= 2.71) {
+                            const excessWeight = weight - 2.7;
+                            const additionalCost = Math.ceil(excessWeight) * (baseCostTuntas * 0.8);
+                            cost += additionalCost;
+                        }
+                        
+                        // Mandatory insurance only for DFOD payment
+                        if (mandatoryInsuranceEnabled && paymentMethod === 'dfod') cost += 1000;
+                        break;
+                        
+                    case 'go-plus':
+                        if (weight <= 1.5) {
+                            cost = 10000;
+                        } else if (weight <= 2.5) {
+                            cost = 20000;
+                        } else if (weight <= 3.5) {
+                            cost = 30000;
+                        } else {
+                            // For weights above 3.5kg, continue the pattern: each additional 1kg = +10000
+                            const additionalKg = Math.ceil(weight - 3.5);
+                            cost = 30000 + (additionalKg * 10000);
+                        }
+                        // Mandatory insurance only for DFOD payment
+                        if (mandatoryInsuranceEnabled && paymentMethod === 'dfod') cost += 1000;
+                        break;
+                        
+                    case 'go':
+                        if (weight <= 1.5) {
+                            cost = 7000;
+                        } else if (weight <= 2.5) {
+                            cost = 14000;
+                        } else if (weight <= 3.5) {
+                            cost = 21000;
+                        } else {
+                            // For weights above 3.5kg, continue the pattern: each additional 1kg = +7000
+                            const additionalKg = Math.ceil(weight - 3.5);
+                            cost = 21000 + (additionalKg * 7000);
+                        }
+                        // Mandatory insurance only for DFOD payment
+                        if (mandatoryInsuranceEnabled && paymentMethod === 'dfod') cost += 1000;
+                        break;
+                        
+                    case 'hemat':
+                        cost = Math.ceil(weight) * 5000;
+                        // Mandatory insurance only for DFOD payment
+                        if (mandatoryInsuranceEnabled && paymentMethod === 'dfod') cost += 1000;
+                        break;
+                        
+                    case 'maxi':
+                        if (weight >= 3 && weight <= 10) {
+                            cost = weight * 4000;
+                        }
+                        // Mandatory insurance only for DFOD payment
+                        if (mandatoryInsuranceEnabled && paymentMethod === 'dfod') cost += 1000;
+                        break;
+                }
+            }
+            
+            // Add insurance cost
+            const insuranceCost = calculateInsuranceCost();
+            cost += insuranceCost;
+            
+            if (paymentMethod === 'dfod') {
+                cost += 1000;
+            }
+            
+            if (discount > 0) {
+                cost = cost * (1 - discount / 100);
+            }
+            
+            // Update display
+            document.getElementById('insurance-cost').textContent = `Rp ${insuranceCost.toLocaleString('id-ID')}`;
+            document.getElementById('total-cost').textContent = `Rp ${cost.toLocaleString('id-ID')}`;
+            return cost;
+        }
+
+        
+
+        function validateForm(formId) {
+            const form = document.getElementById(formId);
+            if (!form) return true; // Jika form tidak ditemukan, anggap valid
+
+            const requiredInputs = form.querySelectorAll('[required]');
+            let allValid = true;
+            requiredInputs.forEach(input => {
+                if (!input.value.trim()) {
+                    input.classList.add('border-red-500');
+                    allValid = false;
+                } else {
+                    input.classList.remove('border-red-500');
+                }
+            });
+            return allValid;
+        }
+
+        async function saveAndPrintOrder() {
+            // Validasi formulir terakhir sebelum menyimpan
+            if (!validateForm('service-page')) {
+                alert('Harap lengkapi semua bidang yang wajib diisi pada halaman Layanan & Tarif!');
+                return;
+            }
+
+            //generateReceiptNumber();         
+
+            const receiptNumber =  document.getElementById('receipt-number').value;
+            const adminName = document.getElementById('admin-name').value;
+            const senderName = document.getElementById('sender-name').value;
+            const senderPhone = document.getElementById('sender-phone').value;
+            const senderAddress = document.getElementById('sender-address').value;
+            const senderCity = document.getElementById('sender-city').value;
+            const senderDistrict = document.getElementById('sender-district').value;
+            const senderVillage = document.getElementById('sender-village').value;
+
+            const receiverName = document.getElementById('receiver-name').value;
+            const receiverPhone = document.getElementById('receiver-phone').value;
+            const receiverAddress = document.getElementById('receiver-address').value;
+            const receiverCity = document.getElementById('receiver-city').value;
+            const receiverDistrict = document.getElementById('receiver-district').value;
+            const receiverVillage = document.getElementById('receiver-village').value;
+
+            const packageContent = document.getElementById('package-content').value;
+            const packageWeight = parseFloat(document.getElementById('package-weight').value) || 0;
+            const packageLength = parseFloat(document.getElementById('package-length').value) || 0;
+            const packageWidth = parseFloat(document.getElementById('package-width').value) || 0;
+            const packageHeight = parseFloat(document.getElementById('package-height').value) || 0;
+            const calculatedVolumeWeight = parseFloat(document.getElementById('volume-weight').value) || 0;
+
+            const itemValue = parseFloat(document.getElementById('item-value').value) || 0;
+            const selectedService = document.querySelector('input[name="service"]:checked')?.value || '';
+            const insuranceChosen = document.querySelector('input[name="insurance"]:checked')?.value === 'yes';
+            const isElectronic = document.getElementById('is-electronic').checked;
+            const insuranceCost = parseFloat(document.getElementById('insurance-cost').textContent.replace('Rp ', '').replace(/\./g, '').replace(',', '.')) || 0;
+            const paymentMethod = document.getElementById('payment-method').value;
+            const discount = parseFloat(document.getElementById('discount').value) || 0;
+            const totalShippingCost = parseFloat(document.getElementById('total-cost').textContent.replace('Rp ', '').replace(/\./g, '').replace(',', '.')) || 0;
+
+            const orderData = {
+                receipt_number: receiptNumber,
+                admin_name: adminName,
+                sender_name: senderName,
+                sender_phone: senderPhone,
+                sender_address: senderAddress,
+                sender_city: senderCity,
+                sender_district: senderDistrict,
+                sender_village: senderVillage,
+                receiver_name: receiverName,
+                receiver_phone: receiverPhone,
+                receiver_address: receiverAddress,
+                receiver_city: receiverCity,
+                receiver_district: receiverDistrict,
+                receiver_village: receiverVillage,
+                package_content: packageContent,
+                package_weight: packageWeight,
+                package_length: packageLength,
+                package_width: packageWidth,
+                package_height: packageHeight,
+                calculated_volume_weight: calculatedVolumeWeight,
+                item_value: itemValue,
+                service_type: selectedService,
+                insurance_chosen: insuranceChosen,
+                is_electronic: isElectronic,
+                insurance_cost: insuranceCost,
+                payment_method: paymentMethod,
+                discount: discount,
+                total_shipping_cost: totalShippingCost,
+                created_at: new Date().toISOString() // Kirim timestamp ISO string
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/orders`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(orderData),
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Failed to save order: ${response.status} ${errorText}`);
+                }
+
+                const savedOrder = await response.json();
+
+                if (!savedOrder || !savedOrder.receipt_number) {
+                    throw new Error('Response JSON tidak valid atau kosong');
+                }
+
+                alert('Pesanan berhasil disimpan! Nomor Resi: ' + savedOrder.receipt_number);
+                console.log('Order saved:', savedOrder);
+                
+                document.getElementById('receipt-number').value = savedOrder.receipt_number;
+
+                //printReceipt(savedOrder);
+                printReceipt(savedOrder);
+                //resetForm();
+                
+
+            } catch (error) {
+                console.error('Error saving order:', error);
+                alert('Gagal menyimpan pesanan. Silakan coba lagi.');
+            }
+
+        }
+
+        function printReceipt(order) {
+            const order2 = normalizeOrderData(order);
+            console.log(' order2:', order2);
+            // Generate receipt HTML using existing order data
+            const receiptWindow = window.open('', '_blank');
+            const receiptContent = generateReceiptHTMLFromOrder(order2);
+            
+            receiptWindow.document.write(receiptContent);
+            receiptWindow.document.close();
+            
+            receiptWindow.focus();
+            setTimeout(() => receiptWindow.print(), 500);
+        }
+
+        function generateReceiptHTML() {
+            const receiptNumber = document.getElementById('receipt-number').value;
+            const timestamp = document.getElementById('timestamp').value;
+            const itemValue = document.getElementById('item-value').value || 0;
+            const insurance = document.querySelector('input[name="insurance"]:checked')?.value || 'no';
+            const insuranceCost = calculateInsuranceCost();
+            const totalCost = calculateTotal();
+            const paymentMethod = document.getElementById('payment-method').value;
+            
+            const order = {
+                id: receiptNumber,
+                timestamp: timestamp,
+                sender: {
+                    name: document.getElementById('sender-name').value,
+                    phone: document.getElementById('sender-phone').value,
+                    address: document.getElementById('sender-address').value,
+                    city: document.getElementById('sender-city').value,
+                    district: document.getElementById('sender-district').value,
+                    village: document.getElementById('sender-village').value
+                },
+                receiver: {
+                    name: document.getElementById('receiver-name').value,
+                    phone: document.getElementById('receiver-phone').value,
+                    address: document.getElementById('receiver-address').value,
+                    city: document.getElementById('receiver-city').value,
+                    district: document.getElementById('receiver-district').value,
+                    village: document.getElementById('receiver-village').value
+                },
+                package: {
+                    content: document.getElementById('package-content').value,
+                    weight: document.getElementById('package-weight').value,
+                    value: itemValue
+                },
+                service: document.querySelector('input[name="service"]:checked').value,
+                insurance: insurance,
+                insuranceCost: insuranceCost,
+                totalCost: totalCost,
+                paymentMethod: paymentMethod
+            };
+            
+            // Get service display name
+            const serviceNames = {
+                'sat-set': 'UBEX SAT SET',
+                'tuntas': 'UBEX TUNTAS',
+                'go-plus': 'UBEX GO+',
+                'go': 'UBEX GO',
+                'hemat': 'UBEX HEMAT',
+                'maxi': 'UBEX MAXI'
+            };
+            
+            const serviceName = serviceNames[order.service] || order.service.toUpperCase();
+            const totalDisplay = paymentMethod === 'dfod' ? 
+                `Rp ${order.totalCost.toLocaleString('id-ID')} (DFOD)` : 
+                `Rp ${order.totalCost.toLocaleString('id-ID')}`;
+            
+            // Function to get delivery estimation
+            function getDeliveryEstimation(service) {
+                const estimations = {
+                    'sat-set': 'Hari ini juga (Sameday)',
+                    'tuntas': 'Hari ini juga (Sameday)',
+                    'go-plus': 'Besok sebelum jam 12:00',
+                    'go': 'Besok (H+1)',
+                    'hemat': '1-2 hari kerja',
+                    'maxi': '1-2 hari kerja'
+                };
+                return estimations[service] || 'Sesuai layanan';
+            }
+            
+            return `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Resi UBEX</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 0; padding: 10mm; }
+                        .receipt-container { width: 105mm; margin: 0 auto; }
+                        .receipt-section { padding: 5mm; font-size: 9px; line-height: 1.2; }
+                        .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 8px; }
+                        .section { margin-bottom: 5px; }
+                        .label { font-weight: bold; }
+                        .divider { border-top: 2px dashed #000; margin: 1mm 0; text-align: center; padding: 2px 0; }
+                        .copy-label { font-size: 8px; font-weight: bold; }
+                        .side-by-side { display: flex; justify-content: space-between; }
+                        .left-col, .right-col { width: 48%; }
+                        .service-highlight { 
+                            border: 2px solid #000; 
+                            padding: 4px; 
+                            text-align: center; 
+                            font-size: 12px; 
+                            font-weight: bold; 
+                            margin: 5px 0;
+                        }
+                        .total-highlight { 
+                            border: 2px solid #000; 
+                            padding: 4px; 
+                            text-align: center; 
+                            font-size: 13px; 
+                            font-weight: bold; 
+                            margin: 5px 0;
+                        }
+                        .destination { font-size: 10px; font-weight: bold; }
+                        @media print { 
+                            body { margin: 0; padding: 0; }
+                            .receipt-container { width: 100%; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="receipt-container">
+                        <!-- Customer Copy -->
+                        <div class="receipt-section">
+                            <div class="header">
+                                <h2 style="margin: 0;">UBEX - URBAN EXPRESS</h2>
+                                <p style="margin: 2px 0;">KIRIMAN LOKAL LEBIH TOTAL</p>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin: 4px 0;">
+                                    <div style="font-weight: bold; font-size: 14px;">No. Resi: ${order.id}</div>
+                                    <div style="font-size: 8px;">${order.timestamp}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="side-by-side section">
+                                <div class="left-col">
+                                    <div class="label">PENGIRIM:</div>
+                                    <div>${order.sender.name}</div>
+                                    <div>${order.sender.phone}</div>
+                                    <div>${order.sender.address}</div>
+                                    <div style="font-size: 8px;">${order.sender.village}, ${order.sender.district}</div>
+                                    <div style="font-size: 8px;">${order.sender.city}</div>
+                                </div>
+                                <div class="right-col">
+                                    <div class="label">PENERIMA:</div>
+                                    <div>${order.receiver.name}</div>
+                                    <div>${order.receiver.phone}</div>
+                                    <div>${order.receiver.address}</div>
+                                    <div class="destination">${order.receiver.village}, ${order.receiver.district}</div>
+                                    <div class="destination">${order.receiver.city}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="section">
+                                <div class="label">PAKET:</div>
+                                <div>${order.package.content} (${order.package.weight} kg)</div>
+                                <div>Nilai: Rp ${parseInt(order.package.value).toLocaleString('id-ID')}</div>
+                                <div>Asuransi: ${order.insurance === 'yes' ? 'Ya' : 'Tidak'} ${order.insuranceCost > 0 ? '(Rp ' + order.insuranceCost.toLocaleString('id-ID') + ')' : ''}</div>
+                                ${order.service !== 'sat-set' && mandatoryInsuranceEnabled && order.paymentMethod === 'dfod' ? '<div style="font-size: 8px; color: #16a34a; font-weight: bold;">✓ Paket ini sudah terproteksi asuransi kehilangan paket</div><div style="font-size: 8px; color: #16a34a; font-weight: bold;">✓ Biaya asuransi wajib: Rp 1.000 (DFOD)</div>' : ''}
+                            </div>
+                            
+                            <div style="display: inline-block; border: 2px solid #000; padding: 4px; margin: 5px 0; font-size: 12px; font-weight: bold;">
+                                LAYANAN: ${serviceName}
+                            </div>
+                            
+                            <div style="display: inline-block; border: 2px solid #000; padding: 4px; margin: 5px 0; font-size: 13px; font-weight: bold;">
+                                TOTAL ONGKIR: ${totalDisplay}
+                            </div>
+                            
+                            <div style="display: flex; align-items: flex-start; gap: 8px; margin: 8px 0;">
+                                <div style="border: 2px solid #000; padding: 6px; font-size: 8px; text-align: center; flex: 1;">
+                                    <div style="font-weight: bold; margin-bottom: 4px;">ESTIMASI PENGIRIMAN: ${getDeliveryEstimation(order.service)}</div>
+                                    <div style="font-weight: bold; margin-bottom: 3px;">"Kirim SAT-SET ke Bandung & Cimahi? Pakai UBEX aja!"</div>
+                                    <div style="margin-bottom: 3px;">Kasih tau Olshop langganan kaka minta kirimnya pakai UBEX</div>
+                                    <div style="margin-bottom: 2px;">Untuk info & pelacakan paket - CS UBEX:</div>
+                                    <div style="font-weight: bold; font-size: 10px; text-decoration: underline;">📞 0851-5883-1313</div>
+                                </div>
+                                <div style="text-align: center; min-width: 70px;">
+                                    <div style="border: 2px solid #000; padding: 2px; margin-bottom: 2px;">
+                                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=66x66&data=${encodeURIComponent('https://maps.google.com/maps?q=' + order.receiver.address + ', ' + order.receiver.village + ', ' + order.receiver.district + ', ' + order.receiver.city)}" style="width: 66px; height: 66px; display: block;">
+                                    </div>
+                                    <div style="font-size: 7px; font-weight: bold;">SCAN UNTUK LOKASI</div>
+                                </div>
+                            </div>
+                            
+                            <div style="border-top: 2px dashed #000; margin-top: 8px; height: 2px;"></div>
+                            
+                            <div class="copy-label" style="text-align: center; margin-top: 8px; margin-bottom: 0;">
+                                --- SENDER COPY ---
+                            </div>
+                        </div>
+                        
+                        <!-- Sender Copy -->
+                        <div class="receipt-section" style="padding-top: 2mm;">
+                            <div class="header">
+                                <h2 style="margin: 0;">UBEX - URBAN EXPRESS</h2>
+                                <p style="margin: 2px 0;">KIRIMAN LOKAL LEBIH TOTAL</p>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin: 4px 0;">
+                                    <div style="font-weight: bold; font-size: 14px;">No. Resi: ${order.id}</div>
+                                    <div style="font-size: 8px;">${order.timestamp}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="side-by-side section">
+                                <div class="left-col">
+                                    <div class="label">PENGIRIM:</div>
+                                    <div>${order.sender.name}</div>
+                                    <div>${order.sender.phone}</div>
+                                    <div>${order.sender.address}</div>
+                                    <div style="font-size: 8px;">${order.sender.village}, ${order.sender.district}</div>
+                                    <div style="font-size: 8px;">${order.sender.city}</div>
+                                </div>
+                                <div class="right-col">
+                                    <div class="label">PENERIMA:</div>
+                                    <div>${order.receiver.name}</div>
+                                    <div>${order.receiver.phone}</div>
+                                    <div>${order.receiver.address}</div>
+                                    <div class="destination">${order.receiver.village}, ${order.receiver.district}</div>
+                                    <div class="destination">${order.receiver.city}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="section">
+                                <div class="label">PAKET:</div>
+                                <div>${order.package.content} (${order.package.weight} kg)</div>
+                                <div>Nilai: Rp ${parseInt(order.package.value).toLocaleString('id-ID')}</div>
+                                <div>Asuransi: ${order.insurance === 'yes' ? 'Ya' : 'Tidak'} ${order.insuranceCost > 0 ? '(Rp ' + order.insuranceCost.toLocaleString('id-ID') + ')' : ''}</div>
+                                ${order.service !== 'sat-set' && mandatoryInsuranceEnabled && order.paymentMethod === 'dfod' ? '<div style="font-size: 8px; color: #16a34a; font-weight: bold;">✓ Paket ini sudah terproteksi asuransi kehilangan paket</div><div style="font-size: 8px; color: #16a34a; font-weight: bold;">✓ Biaya asuransi wajib: Rp 1.000 (DFOD)</div>' : ''}
+                            </div>
+                            
+                            <div style="display: inline-block; border: 2px solid #000; padding: 4px; margin: 5px 0; font-size: 12px; font-weight: bold;">
+                                LAYANAN: ${serviceName}
+                            </div>
+                            
+                            <div style="display: inline-block; border: 2px solid #000; padding: 4px; margin: 5px 0; font-size: 13px; font-weight: bold;">
+                                TOTAL ONGKIR: ${totalDisplay}
+                            </div>
+                            
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `;
+        }
+
+        // Report functions
+        function updateReportSummary() {
+            const displayOrders = filteredOrders.length > 0 ? filteredOrders : orders;
+            
+            document.getElementById('total-orders').textContent = displayOrders.length;
+            document.getElementById('total-revenue').textContent = `Rp ${displayOrders.reduce((sum, order) => sum + order.totalCost, 0).toLocaleString('id-ID')}`;
+            document.getElementById('pending-pickup').textContent = displayOrders.filter(order => order.status === 'pending').length;
+            document.getElementById('total-cash').textContent = `Rp ${displayOrders.filter(order => order.paymentMethod === 'cash').reduce((sum, order) => sum + order.totalCost, 0).toLocaleString('id-ID')}`;
+            document.getElementById('total-dfod').textContent = `Rp ${displayOrders.filter(order => order.paymentMethod === 'dfod').reduce((sum, order) => sum + order.totalCost, 0).toLocaleString('id-ID')}`;
+            document.getElementById('total-cancelled').textContent = displayOrders.filter(order => order.status === 'cancelled').length;
+        }
+
+        function updateOrdersTable() {
+            const tbody = document.getElementById('orders-table');
+            const displayOrders = filteredOrders.length > 0 ? filteredOrders : orders;
+            
+            if (displayOrders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="13" class="border border-gray-300 px-4 py-8 text-center text-gray-500">Belum ada data pesanan</td></tr>';
+                return;
+            }
+            
+            // Get service display names
+            const serviceNames = {
+                'sat-set': 'UBEX SAT SET',
+                'tuntas': 'UBEX TUNTAS',
+                'go-plus': 'UBEX GO+',
+                'go': 'UBEX GO',
+                'hemat': 'UBEX HEMAT',
+                'maxi': 'UBEX MAXI'
+            };
+            
+            tbody.innerHTML = displayOrders.map((order, index) => {
+                const orderDate = new Date(order.timestamp);
+                const originalIndex = orders.findIndex(o => o.id === order.id);                
+                
+                return `
+                <tr class="hover:bg-gray-50">
+                    <td class="border border-gray-300 px-2 py-2 text-xs">
+                        <div class="font-medium">${orderDate.toLocaleDateString('id-ID')}</div>
+                        <div class="text-gray-600 text-xs">${orderDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</div>
+                    </td>
+                    <td class="border border-gray-300 px-2 py-2 font-mono text-xs">${order.id}</td>
+                    <td class="border border-gray-300 px-2 py-2 text-xs">${order.admin}</td>
+                    <td class="border border-gray-300 px-2 py-2 text-xs">
+                        <div class="font-medium">${order.sender.name}</div>
+                        <div class="text-gray-600">${order.sender.phone}</div>
+                    </td>
+                    <td class="border border-gray-300 px-2 py-2 text-xs">
+                        <div class="font-medium">${order.receiver.name}</div>
+                        <div class="text-gray-600">${order.receiver.phone}</div>
+                    </td>
+                    <td class="border border-gray-300 px-2 py-2 text-xs">
+                        <div>${order.receiver.address}</div>
+                        <div class="text-gray-600">${order.receiver.village}, ${order.receiver.district}</div>
+                        <div class="text-gray-600">${order.receiver.city}</div>
+                    </td>
+                    <td class="border border-gray-300 px-2 py-2 text-xs">${order.package.content}</td>
+                    <td class="border border-gray-300 px-2 py-2 text-xs">${order.package.weight} kg</td>
+                    <td class="border border-gray-300 px-2 py-2 text-xs font-medium">${serviceNames[order.service] || order.service.toUpperCase()}</td>
+                    <td class="border border-gray-300 px-2 py-2 text-xs">
+                        <span class="px-2 py-1 rounded text-xs ${order.paymentMethod === 'dfod' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}">
+                            ${order.paymentMethod === 'dfod' ? 'DFOD' : 'CASH'}
+                        </span>
+                    </td>
+                    <td class="border border-gray-300 px-2 py-2 text-xs font-medium">Rp ${order.totalCost.toLocaleString('id-ID')}</td>
+                   <td class="border border-gray-300 px-2 py-2 relative">
+                        <div class="relative inline-block text-left">
+                            <button onclick="toggleDropdown(this)" class="bg-gray-200 text-gray-800 px-2 py-1 rounded text-xs hover:bg-gray-300">
+                            ⋯
+                            </button>
+                            <div class="hidden absolute right-0 mt-1 w-28 bg-white border border-gray-300 rounded shadow z-10 text-xs" data-dropdown>
+                            <button onclick="reprintReceipt(${order.id}); closeAllDropdowns()" class="w-full text-left px-3 py-2 hover:bg-gray-100">
+                                🖨️ Print
+                            </button>
+                            <button onclick="cancelOrder(${order.id}); closeAllDropdowns()" class="w-full text-left px-3 py-2 hover:bg-gray-100 text-red-600">
+                                ❌ Cancel
+                            </button>
+                            </div>
+                        </div>
+                    </td>
+
+
+                </tr>
+            `;
+            }).join('');
+        }
+
+        function normalizeOrderData(rawOrder) {
+            return {
+                id: rawOrder.receipt_number,
+                timestamp: rawOrder.timestamp || new Date().toISOString(),
+                admin: rawOrder.admin_name,
+                sender: {
+                    name: rawOrder.sender_name,
+                    phone: rawOrder.sender_phone,
+                    address: rawOrder.sender_address,
+                    village: rawOrder.sender_village,
+                    district: rawOrder.sender_district,
+                    city: rawOrder.sender_city
+                },
+                receiver: {
+                    name: rawOrder.receiver_name,
+                    phone: rawOrder.receiver_phone,
+                    address: rawOrder.receiver_address,
+                    village: rawOrder.receiver_village,
+                    district: rawOrder.receiver_district,
+                    city: rawOrder.receiver_city
+                },
+                package: {
+                    content: rawOrder.package_content,
+                    weight: rawOrder.package_weight,
+                    value: rawOrder.item_value
+                },
+                service: rawOrder.service_type,
+                paymentMethod: rawOrder.payment_method,
+                totalCost: rawOrder.total_shipping_cost,
+                insurance: rawOrder.insurance,
+                insuranceCost: rawOrder.insurance_cost,
+                status: rawOrder.status
+                
+            };
+        }
+
+
+
+        function reprintReceipt(orderIndex) {
+           
+            const order = orders.find(o => o.id === orderIndex);
+
+            if (!order) {
+                alert('Data pesanan tidak ditemukan!');
+                return;
+            }
+
+            console.log('Order index/id:', orderIndex);
+            console.log('Orders:', orders);
+            console.log('Found order:', order);
+
+            const rawOrder = orders.find(o => o.id === orderIndex);
+            const order2 = normalizeOrderData(rawOrder);
+            console.log(' order2:', order2);
+            // Generate receipt HTML using existing order data
+            const receiptWindow = window.open('', '_blank');
+            const receiptContent = generateReceiptHTMLFromOrder(order2);
+            
+            receiptWindow.document.write(receiptContent);
+            receiptWindow.document.close();
+            
+            receiptWindow.focus();
+            setTimeout(() => receiptWindow.print(), 500);
+        }
+
+        function generateReceiptHTMLFromOrder(order) {
+            // Get service display name
+            const serviceNames = {
+                'sat-set': 'UBEX SAT SET',
+                'tuntas': 'UBEX TUNTAS',
+                'go-plus': 'UBEX GO+',
+                'go': 'UBEX GO',
+                'hemat': 'UBEX HEMAT',
+                'maxi': 'UBEX MAXI'
+            };
+            
+            //const serviceName = serviceNames[order.service] || order.service.toUpperCase();
+            const serviceName = order.service
+                ? (serviceNames[order.service] || order.service.toUpperCase())
+                : 'UNKNOWN';
+
+            const totalDisplay = order.paymentMethod === 'dfod'
+                ? `Rp ${(order.totalCost || 0).toLocaleString('id-ID')} (DFOD)`
+                : `Rp ${(order.totalCost || 0).toLocaleString('id-ID')}`;
+
+            
+            // Function to get delivery estimation
+            function getDeliveryEstimation(service) {
+                const estimations = {
+                    'sat-set': 'Hari ini juga (Sameday)',
+                    'tuntas': 'Hari ini juga (Sameday)',
+                    'go-plus': 'Besok sebelum jam 12:00',
+                    'go': 'Besok (H+1)',
+                    'hemat': '1-2 hari kerja',
+                    'maxi': '1-2 hari kerja'
+                };
+                return estimations[service] || 'Sesuai layanan';
+            }
+            
+            return `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Resi UBEX</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 0; padding: 10mm; }
+                        .receipt-container { width: 105mm; margin: 0 auto; }
+                        .receipt-section { padding: 5mm; font-size: 9px; line-height: 1.2; }
+                        .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 8px; }
+                        .section { margin-bottom: 5px; }
+                        .label { font-weight: bold; }
+                        .divider { border-top: 2px dashed #000; margin: 1mm 0; text-align: center; padding: 2px 0; }
+                        .copy-label { font-size: 8px; font-weight: bold; }
+                        .side-by-side { display: flex; justify-content: space-between; }
+                        .left-col, .right-col { width: 48%; }
+                        .service-highlight { 
+                            border: 2px solid #000; 
+                            padding: 4px; 
+                            text-align: center; 
+                            font-size: 12px; 
+                            font-weight: bold; 
+                            margin: 5px 0;
+                        }
+                        .total-highlight { 
+                            border: 2px solid #000; 
+                            padding: 4px; 
+                            text-align: center; 
+                            font-size: 13px; 
+                            font-weight: bold; 
+                            margin: 5px 0;
+                        }
+                        .destination { font-size: 10px; font-weight: bold; }
+                        @media print { 
+                            body { margin: 0; padding: 0; }
+                            .receipt-container { width: 100%; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="receipt-container">
+                        <!-- Customer Copy -->
+                        <div class="receipt-section">
+                            <div class="header">
+                                <h2 style="margin: 0;">UBEX - URBAN EXPRESS</h2>
+                                <p style="margin: 2px 0;">KIRIMAN LOKAL LEBIH TOTAL</p>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin: 4px 0;">
+                                    <div style="font-weight: bold; font-size: 14px;">No. Resi: ${order.id}</div>
+                                    <div style="font-size: 8px;">${order.timestamp}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="side-by-side section">
+                                <div class="left-col">
+                                    <div class="label">PENGIRIM:</div>
+                                    <div>${order.sender.name}</div>
+                                    <div>${order.sender.phone}</div>
+                                    <div>${order.sender.address}</div>
+                                    <div style="font-size: 8px;">${order.sender.village}, ${order.sender.district}</div>
+                                    <div style="font-size: 8px;">${order.sender.city}</div>
+                                </div>
+                                <div class="right-col">
+                                    <div class="label">PENERIMA:</div>
+                                    <div>${order.receiver.name}</div>
+                                    <div>${order.receiver.phone}</div>
+                                    <div>${order.receiver.address}</div>
+                                    <div class="destination">${order.receiver.village}, ${order.receiver.district}</div>
+                                    <div class="destination">${order.receiver.city}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="section">
+                                <div class="label">PAKET:</div>
+                                <div>${order.package.content} (${order.package.weight} kg)</div>
+                                <div>Nilai: Rp ${parseInt(order.package.value).toLocaleString('id-ID')}</div>
+                                <div>Asuransi: ${order.insurance === 'yes' ? 'Ya' : 'Tidak'} ${order.insuranceCost > 0 ? '(Rp ' + order.insuranceCost.toLocaleString('id-ID') + ')' : ''}</div>
+                                ${order.service !== 'sat-set' && mandatoryInsuranceEnabled && order.paymentMethod === 'dfod' ? '<div style="font-size: 8px; color: #16a34a; font-weight: bold;">✓ Paket ini sudah terproteksi asuransi kehilangan paket</div><div style="font-size: 8px; color: #16a34a; font-weight: bold;">✓ Biaya asuransi wajib: Rp 1.000 (DFOD)</div>' : ''}
+                            </div>
+                            
+                            <div style="display: inline-block; border: 2px solid #000; padding: 4px; margin: 5px 0; font-size: 12px; font-weight: bold;">
+                                LAYANAN: ${serviceName}
+                            </div>
+                            
+                            <div style="display: inline-block; border: 2px solid #000; padding: 4px; margin: 5px 0; font-size: 13px; font-weight: bold;">
+                                TOTAL ONGKIR: ${totalDisplay}
+                            </div>
+                            
+                            <div style="display: flex; align-items: flex-start; gap: 8px; margin: 8px 0;">
+                                <div style="border: 2px solid #000; padding: 6px; font-size: 8px; text-align: center; flex: 1;">
+                                    <div style="font-weight: bold; margin-bottom: 4px;">ESTIMASI PENGIRIMAN: ${getDeliveryEstimation(order.service)}</div>
+                                    <div style="font-weight: bold; margin-bottom: 3px;">"Kirim SAT-SET ke Bandung & Cimahi? Pakai UBEX aja!"</div>
+                                    <div style="margin-bottom: 3px;">Kasih tau Olshop langganan kaka minta kirimnya pakai UBEX</div>
+                                    <div style="margin-bottom: 2px;">Untuk info & pelacakan paket - CS UBEX:</div>
+                                    <div style="font-weight: bold; font-size: 10px; text-decoration: underline;">📞 0851-5883-1313</div>
+                                </div>
+                                <div style="text-align: center; min-width: 70px;">
+                                    <div style="border: 2px solid #000; padding: 2px; margin-bottom: 2px;">
+                                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=66x66&data=${encodeURIComponent('https://maps.google.com/maps?q=' + order.receiver.address + ', ' + order.receiver.village + ', ' + order.receiver.district + ', ' + order.receiver.city)}" style="width: 66px; height: 66px; display: block;">
+                                    </div>
+                                    <div style="font-size: 7px; font-weight: bold;">SCAN UNTUK LOKASI</div>
+                                </div>
+                            </div>
+                            
+                            <div style="border-top: 2px dashed #000; margin-top: 8px; height: 2px;"></div>
+                            
+                            <div class="copy-label" style="text-align: center; margin-top: 8px; margin-bottom: 0;">
+                                --- SENDER COPY ---
+                            </div>
+                        </div>
+                        
+                        <!-- Sender Copy -->
+                        <div class="receipt-section" style="padding-top: 2mm;">
+                            <div class="header">
+                                <h2 style="margin: 0;">UBEX - URBAN EXPRESS</h2>
+                                <p style="margin: 2px 0;">KIRIMAN LOKAL LEBIH TOTAL</p>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin: 4px 0;">
+                                    <div style="font-weight: bold; font-size: 14px;">No. Resi: ${order.id}</div>
+                                    <div style="font-size: 8px;">${order.timestamp}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="side-by-side section">
+                                <div class="left-col">
+                                    <div class="label">PENGIRIM:</div>
+                                    <div>${order.sender.name}</div>
+                                    <div>${order.sender.phone}</div>
+                                    <div>${order.sender.address}</div>
+                                    <div style="font-size: 8px;">${order.sender.village}, ${order.sender.district}</div>
+                                    <div style="font-size: 8px;">${order.sender.city}</div>
+                                </div>
+                                <div class="right-col">
+                                    <div class="label">PENERIMA:</div>
+                                    <div>${order.receiver.name}</div>
+                                    <div>${order.receiver.phone}</div>
+                                    <div>${order.receiver.address}</div>
+                                    <div class="destination">${order.receiver.village}, ${order.receiver.district}</div>
+                                    <div class="destination">${order.receiver.city}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="section">
+                                <div class="label">PAKET:</div>
+                                <div>${order.package.content} (${order.package.weight} kg)</div>
+                                <div>Nilai: Rp ${parseInt(order.package.value).toLocaleString('id-ID')}</div>
+                                <div>Asuransi: ${order.insurance === 'yes' ? 'Ya' : 'Tidak'} ${order.insuranceCost > 0 ? '(Rp ' + order.insuranceCost.toLocaleString('id-ID') + ')' : ''}</div>
+                                ${order.service !== 'sat-set' && mandatoryInsuranceEnabled && order.paymentMethod === 'dfod' ? '<div style="font-size: 8px; color: #16a34a; font-weight: bold;">✓ Paket ini sudah terproteksi asuransi kehilangan paket</div><div style="font-size: 8px; color: #16a34a; font-weight: bold;">✓ Biaya asuransi wajib: Rp 1.000 (DFOD)</div>' : ''}
+                            </div>
+                            
+                            <div style="display: inline-block; border: 2px solid #000; padding: 4px; margin: 5px 0; font-size: 12px; font-weight: bold;">
+                                LAYANAN: ${serviceName}
+                            </div>
+                            
+                            <div style="display: inline-block; border: 2px solid #000; padding: 4px; margin: 5px 0; font-size: 13px; font-weight: bold;">
+                                TOTAL ONGKIR: ${totalDisplay}
+                            </div>
+                            
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `;
+        }
+
+        function printManifest() {
+            const pendingOrders = orders
+                .map(normalizeOrderData)
+                .filter(order => order.status === 'pending');
+
+            if (pendingOrders.length === 0) {
+                alert('Tidak ada pesanan yang perlu dikirim!');
+                return;
+            }
+
+            const serviceNames = {
+                'sat-set': 'UBEX SAT SET',
+                'tuntas': 'UBEX TUNTAS',
+                'go-plus': 'UBEX GO+',
+                'go': 'UBEX GO',
+                'hemat': 'UBEX HEMAT',
+                'maxi': 'UBEX MAXI'
+            };
+
+            const manifestWindow = window.open('', '_blank');
+            const manifestContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Manifest Kurir UBEX</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; font-size: 12px; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th, td { border: 1px solid #000; padding: 6px; text-align: left; vertical-align: top; }
+                        th { background-color: #f0f0f0; font-weight: bold; text-align: center; }
+                        .header { text-align: center; margin-bottom: 20px; }
+                        .signature-section { margin-top: 40px; border: 2px solid #000; padding: 20px; }
+                        .signature-row { display: flex; justify-content: space-between; margin-bottom: 60px; }
+                        .signature-box { text-align: center; width: 45%; }
+                        .signature-line { border-bottom: 1px solid #000; margin-bottom: 5px; height: 50px; }
+                        .total-section { margin-top: 20px; padding: 10px; border: 2px solid #000; background-color: #f9f9f9; }
+                        .dfod-highlight { background-color: #e3f2fd; font-weight: bold; }
+                        .responsibility-note { 
+                            margin-top: 15px; 
+                            padding: 15px; 
+                            border: 2px solid #d32f2f; 
+                            background-color: #e31231; 
+                            font-size: 11px; 
+                            text-align: justify; 
+                            line-height: 1.4;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>UBEX - URBAN EXPRESS</h1>
+                        <h2>MANIFEST KURIR</h2>
+                        <p><strong>Tanggal: ${new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</strong></p>
+                        <p>Waktu Cetak: ${new Date().toLocaleTimeString('id-ID')}</p>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 8%;">No</th>
+                                <th style="width: 20%;">No. Resi</th>
+                                <th style="width: 32%;">Layanan</th>
+                                <th style="width: 20%;">Total Ongkir</th>
+                                <th style="width: 20%;">Keterangan DFOD</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${pendingOrders.map((order, index) => `
+                                <tr ${order.paymentMethod === 'dfod' ? 'class="dfod-highlight"' : ''}>
+                                    <td style="text-align: center;">${index + 1}</td>
+                                    <td style="font-family: monospace; font-weight: bold;">${order.id}</td>
+                                    <td style="font-weight: bold;">${serviceNames[order.service] || order.service.toUpperCase()}</td>
+                                    <td style="font-weight: bold;">Rp ${order.totalCost.toLocaleString('id-ID')}</td>
+                                    <td style="text-align: center;">
+                                        ${order.paymentMethod === 'dfod' ? 
+                                            '<strong style="color: #1976d2;">DFOD</strong><br><small>Tagih ke Penerima</small>' : 
+                                            '<span style="color: #388e3c;">LUNAS</span>'
+                                        }
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+
+                    <div class="total-section">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <div><strong>Total Pesanan: ${pendingOrders.length} paket</strong></div>
+                            <div><strong>Total Nilai: Rp ${pendingOrders.reduce((sum, order) => sum + order.totalCost, 0).toLocaleString('id-ID')}</strong></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <div><strong style="color: #388e3c;">CASH (Lunas): Rp ${pendingOrders.filter(order => order.paymentMethod === 'cash').reduce((sum, order) => sum + order.totalCost, 0).toLocaleString('id-ID')}</strong></div>
+                            <div><strong style="color: #1976d2;">DFOD (Tagih): Rp ${pendingOrders.filter(order => order.paymentMethod === 'dfod').reduce((sum, order) => sum + order.totalCost, 0).toLocaleString('id-ID')}</strong></div>
+                        </div>
+                    </div>
+
+                    <div class="signature-section">
+                        <h3 style="text-align: center; margin-bottom: 30px;">TANDA TANGAN & VERIFIKASI</h3>
+                        <div class="signature-row">
+                            <div class="signature-box">
+                                <div><strong>PETUGAS LOKET</strong></div>
+                                <div class="signature-line"></div>
+                                <div>Nama: _________________</div>
+                                <div>Tanggal: ${new Date().toLocaleDateString('id-ID')}</div>
+                            </div>
+                            <div class="signature-box">
+                                <div><strong>KURIR ANTAR</strong></div>
+                                <div class="signature-line"></div>
+                                <div>Nama: _________________</div>
+                                <div>Tanggal: ${new Date().toLocaleDateString('id-ID')}</div>
+                            </div>
+                        </div>
+
+                        <div class="responsibility-note">
+                            <div style="text-align: center; font-weight: bold; margin-bottom: 10px; font-size: 12px;">
+                                ⚠️ PERNYATAAN TANGGUNG JAWAB ⚠️
+                            </div>
+                            <p><strong>Dengan menandatangani manifest ini, kedua belah pihak (Petugas Loket dan Kurir Antar) menyatakan:</strong></p>
+                            <ol style="margin: 10px 0; padding-left: 20px;">
+                                <li>Bertanggung jawab penuh terhadap keakuratan data yang tercantum dalam manifest ini</li>
+                                <li>Bertanggung jawab terhadap penagihan dan penyetoran dana DFOD sesuai dengan yang tercantum</li>
+                                <li>Memahami bahwa setiap kesalahan data atau kehilangan dana DFOD menjadi tanggung jawab bersama</li>
+                                <li>Wajib melaporkan segala kendala atau perubahan status pengiriman kepada manajemen</li>
+                            </ol>
+                            <p style="text-align: center; font-weight: bold;">
+                                Dokumen ini merupakan bukti serah terima resmi antara loket dan kurir antar UBEX
+                            </p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `;
+
+            manifestWindow.document.write(manifestContent);
+            manifestWindow.document.close();
+            manifestWindow.focus();
+            setTimeout(() => manifestWindow.print(), 500);
+        }
+
+
+        function printDatabase() {
+            if (orders.length === 0) {
+                alert('Tidak ada data untuk dicetak!');
+                return;
+            }
+
+            const normalizedOrders = orders.map(normalizeOrderData);
+
+            const serviceNames = {
+                'sat-set': 'UBEX SAT SET',
+                'tuntas': 'UBEX TUNTAS',
+                'go-plus': 'UBEX GO+',
+                'go': 'UBEX GO',
+                'hemat': 'UBEX HEMAT',
+                'maxi': 'UBEX MAXI'
+            };
+
+            const databaseWindow = window.open('', '_blank');
+
+            const databaseContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Database UBEX - ${new Date().toLocaleDateString('id-ID')}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; font-size: 10px; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th, td { border: 1px solid #000; padding: 4px; text-align: left; vertical-align: top; }
+                        th { background-color: #f0f0f0; font-weight: bold; text-align: center; font-size: 9px; }
+                        .header { text-align: center; margin-bottom: 20px; }
+                        .summary { margin-bottom: 20px; padding: 15px; border: 2px solid #000; background-color: #f9f9f9; }
+                        .summary-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+                        .dfod-row { background-color: #e3f2fd; }
+                        .cash-row { background-color: #e8f5e8; }
+                        .pending-row { background-color: #fff3e0; }
+                        .delivered-row { background-color: #f3e5f5; }
+                        .cancelled-row { background-color: #e31231; }
+                        @media print {
+                            body { margin: 10px; font-size: 8px; }
+                            th, td { padding: 2px; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>UBEX - URBAN EXPRESS</h1>
+                        <h2>DATABASE LENGKAP PESANAN</h2>
+                        <p><strong>Tanggal Cetak: ${new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</strong></p>
+                        <p>Waktu Cetak: ${new Date().toLocaleTimeString('id-ID')}</p>
+                    </div>
+                    
+                    <div class="summary">
+                        <h3 style="text-align: center; margin-bottom: 15px;">RINGKASAN DATABASE</h3>
+                        <div class="summary-row">
+                            <div><strong>Total Pesanan:</strong> ${normalizedOrders.length} paket</div>
+                            <div><strong>Total Nilai:</strong> Rp ${normalizedOrders.reduce((sum, order) => sum + order.totalCost, 0).toLocaleString('id-ID')}</div>
+                        </div>
+                        <div class="summary-row">
+                            <div><strong>Pembayaran CASH:</strong> ${normalizedOrders.filter(order => order.paymentMethod === 'cash').length} pesanan</div>
+                            <div><strong>Nilai CASH:</strong> Rp ${normalizedOrders.filter(order => order.paymentMethod === 'cash').reduce((sum, order) => sum + order.totalCost, 0).toLocaleString('id-ID')}</div>
+                        </div>
+                        <div class="summary-row">
+                            <div><strong>Pembayaran DFOD:</strong> ${normalizedOrders.filter(order => order.paymentMethod === 'dfod').length} pesanan</div>
+                            <div><strong>Nilai DFOD:</strong> Rp ${normalizedOrders.filter(order => order.paymentMethod === 'dfod').reduce((sum, order) => sum + order.totalCost, 0).toLocaleString('id-ID')}</div>
+                        </div>
+                        <div class="summary-row">
+                            <div><strong>Status Pending:</strong> ${normalizedOrders.filter(order => order.status === 'pending').length} pesanan</div>
+                            <div><strong>Status Delivered:</strong> ${normalizedOrders.filter(order => order.status === 'delivered').length} pesanan</div>
+                        </div>
+                         <div class="summary-row">
+                           <div><strong>Status Cancel:</strong> ${normalizedOrders.filter(order => order.status === 'cancelled').length} pesanan</div>
+                        </div>
+                    </div>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Tanggal</th>
+                                <th>No. Resi</th>
+                                <th>Admin</th>
+                                <th>Pengirim</th>
+                                <th>Penerima</th>
+                                <th>Alamat Tujuan</th>
+                                <th>Isi Paket</th>
+                                <th>Berat</th>
+                                <th>Layanan</th>
+                                <th>Pembayaran</th>
+                                <th>Ongkir</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${normalizedOrders.map((order, index) => {
+                                let rowClass = '';
+                                if (order.paymentMethod === 'dfod') rowClass += 'dfod-row ';
+                                if (order.paymentMethod === 'cash') rowClass += 'cash-row ';
+                                if (order.status === 'pending') rowClass += 'pending-row ';
+                                if (order.status === 'delivered') rowClass += 'delivered-row ';
+                                if (order.status === 'cancelled') rowClass += 'cancelled-row ';
+                                
+                                return `
+                                <tr class="${rowClass.trim()}">
+                                    <td style="text-align: center;">${index + 1}</td>
+                                    <td>${new Date(order.timestamp).toLocaleDateString('id-ID')}</td>
+                                    <td style="font-family: monospace; font-weight: bold;">${order.id}</td>
+                                    <td>${order.admin}</td>
+                                    <td>
+                                        <div style="font-weight: bold;">${order.sender.name}</div>
+                                        <div style="font-size: 8px;">${order.sender.phone}</div>
+                                        <div style="font-size: 8px;">${order.sender.city}</div>
+                                    </td>
+                                    <td>
+                                        <div style="font-weight: bold;">${order.receiver.name}</div>
+                                        <div style="font-size: 8px;">${order.receiver.phone}</div>
+                                    </td>
+                                    <td>
+                                        <div>${order.receiver.address}</div>
+                                        <div style="font-size: 8px; font-weight: bold;">${order.receiver.village}, ${order.receiver.district}</div>
+                                        <div style="font-size: 8px; font-weight: bold;">${order.receiver.city}</div>
+                                    </td>
+                                    <td>${order.package.content}</td>
+                                    <td style="text-align: center;">${order.package.weight} kg</td>
+                                    <td style="font-weight: bold;">${serviceNames[order.service] || order.service.toUpperCase()}</td>
+                                    <td style="text-align: center;">
+                                        <span style="font-weight: bold; ${order.paymentMethod === 'dfod' ? 'color: #1976d2;' : 'color: #388e3c;'}">
+                                            ${order.paymentMethod === 'dfod' ? 'DFOD' : 'CASH'}
+                                        </span>
+                                    </td>
+                                    <td style="font-weight: bold; text-align: right;">Rp ${order.totalCost.toLocaleString('id-ID')}</td>
+                                    <td style="text-align: center;">
+                                        <span style="font-weight: bold; ${order.status === 'pending' ? 'color: #f57c00;' : 'color: #7b1fa2;'}">
+                                            ${order.status === 'pending' ? 'PENDING' : order.status === 'cancelled' ? 'CANCELLED' : 'DELIVERED'}
+                                        </span>
+                                    </td>
+                                </tr>`;
+                            }).join('')}
+                        </tbody>
+                    </table>
+
+                    <div style="margin-top: 30px; padding: 15
+
+                    
+                    <div style="margin-top: 30px; padding: 15px; border: 2px solid #000; background-color: #f0f0f0;">
+                        <h4 style="text-align: center; margin-bottom: 10px;">KETERANGAN WARNA</h4>
+                        <div style="display: flex; justify-content: space-around; flex-wrap: wrap;">
+                            <div style="margin: 5px;">
+                                <span style="background-color: #e3f2fd; padding: 2px 8px; border: 1px solid #000;">DFOD</span>
+                                <span style="font-size: 9px;"> = Pembayaran DFOD</span>
+                            </div>
+                            <div style="margin: 5px;">
+                                <span style="background-color: #e8f5e8; padding: 2px 8px; border: 1px solid #000;">CASH</span>
+                                <span style="font-size: 9px;"> = Pembayaran CASH</span>
+                            </div>
+                            <div style="margin: 5px;">
+                                <span style="background-color: #fff3e0; padding: 2px 8px; border: 1px solid #000;">PENDING</span>
+                                <span style="font-size: 9px;"> = Status Pending</span>
+                            </div>
+                            <div style="margin: 5px;">
+                                <span style="background-color: #f3e5f5; padding: 2px 8px; border: 1px solid #000;">DELIVERED</span>
+                                <span style="font-size: 9px;"> = Status Delivered</span>
+                            </div>
+                            <div style="margin: 5px;">
+                                <span style="background-color: #e31231; padding: 2px 8px; border: 1px solid #000;">CANCELLED</span>
+                                <span style="font-size: 9px;"> = Status Cancelled</span>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px; text-align: center; font-size: 9px; color: #666;">
+                        <p>Dokumen ini dicetak secara otomatis dari sistem UBEX - Urban Express</p>
+                        <p>Untuk informasi lebih lanjut hubungi CS UBEX: 📞 0851-5883-1313</p>
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            databaseWindow.document.write(databaseContent);
+            databaseWindow.document.close();
+            databaseWindow.focus();
+            setTimeout(() => databaseWindow.print(), 500);
+        }
+
+        // Insurance toggle function
+        function toggleMandatoryInsurance() {
+            mandatoryInsuranceEnabled = document.getElementById('mandatory-insurance-toggle').checked;
+            localStorage.setItem('ubex-mandatory-insurance', JSON.stringify(mandatoryInsuranceEnabled));
+            
+            // Update service descriptions
+            updateInsuranceTexts();
+            
+            // Recalculate if service is selected
+            if (document.querySelector('input[name="service"]:checked')) {
+                calculateTotal();
+            }
+        }
+
+        function updateInsuranceTexts() {
+            const insuranceText = mandatoryInsuranceEnabled ? 
+                '✓ Asuransi wajib Rp 1.000 (DFOD)' : 
+                '✗ Tanpa asuransi wajib';
+            
+            const textColor = mandatoryInsuranceEnabled ? 'text-green-600' : 'text-red-600';
+            
+            ['tuntas', 'go-plus', 'go', 'hemat', 'maxi'].forEach(service => {
+                const element = document.getElementById(`${service}-insurance-text`);
+                if (element) {
+                    element.textContent = insuranceText;
+                    element.className = `text-xs ${textColor}`;
+                }
+            });
+        }
+
+        // Settings functions
+        function setTheme(theme) {
+            document.body.className = document.body.className.replace(/\b(red|green)-theme\b/g, '');
+            
+            if (theme === 'red') {
+                document.body.classList.add('red-theme');
+            } else if (theme === 'green') {
+                document.body.classList.add('green-theme');
+            }
+            
+            localStorage.setItem('ubex-theme', theme);
+            currentTheme = theme;
+            
+            // Update radio button
+            document.querySelector(`input[name="theme"][value="${theme}"]`).checked = true;
+        }
+
+        function saveEmbargoSettings() {
+            localStorage.setItem('ubex-embargo', JSON.stringify(embargoSettings));
+            alert('Pengaturan embargo berhasil disimpan!');
+        }
+
+        // Auto-calculate when values change
+        document.addEventListener('input', function(e) {
+            if (e.target.id === 'package-weight' || e.target.id === 'item-value') {
+                calculateTotal();
+            }
+        });
+
+        // Allow manual editing of receipt number
+        document.addEventListener('input', function(e) {
+            if (e.target.id === 'receipt-number') {
+                // Extract number from receipt and update counter
+                const receiptValue = e.target.value;
+                const match = receiptValue.match(/UBXA00(\d+)/);
+                if (match) {
+                    const newNumber = parseInt(match[1]);
+                    if (!isNaN(newNumber) && newNumber >= 10001) {
+                        currentReceiptNumber = newNumber;
+                        localStorage.setItem('ubex-receipt-counter', currentReceiptNumber.toString());
+                    }
+                }
+            }
+        });
+
+        // Filter functions
+        async function populateAdminFilter() {
+            const adminSelect = document.getElementById('filter-admin');
+            adminSelect.innerHTML = '<option value="">Semua Admin</option>'; // Reset
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/orders`); // Ambil semua order
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch orders for admin filter: ${response.status}`);
+                }
+                const orders = await response.json();
+                const uniqueAdmins = [...new Set(orders.map(order => order.admin_name))];
+
+                uniqueAdmins.forEach(admin => {
+                    const option = document.createElement('option');
+                    option.value = admin;
+                    option.textContent = admin;
+                    adminSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error populating admin filter:', error);
+            }
+        }
+
+        function resetForm() {
+             console.log('start reset');
+            document.getElementById('sender-form').reset();
+            document.getElementById('receiver-form').reset();
+             document.getElementById('item-value').value = '';
+            document.getElementById('package-length').value = '';
+            document.getElementById('package-width').value = '';
+            document.getElementById('package-height').value = '';
+            document.getElementById('package-volume').value = '';
+            document.getElementById('volume-weight').value = '';
+            document.querySelectorAll('input[name="service"]').forEach(radio => radio.checked = false);
+            document.querySelector('input[name="insurance"][value="no"]').checked = true; // Default tanpa asuransi
+            document.getElementById('is-electronic').checked = false;
+            document.getElementById('payment-method').value = 'cash';
+            document.getElementById('discount').value = '0';
+            document.getElementById('insurance-cost').textContent = 'Rp 0';
+            document.getElementById('total-cost').textContent = 'Rp 0';
+            document.getElementById('receipt-number').value = "";
+            // Reset kelas validasi
+            document.querySelectorAll('.border-red-500').forEach(el => el.classList.remove('border-red-500'));
+            
+            // Generate nomor resi baru
+            //generateReceiptNumber();
+           //  Update timestamp
+            document.getElementById('timestamp').value = new Date().toLocaleString('id-ID', {
+               year: 'numeric', month: 'long', day: 'numeric',
+               hour: '2-digit', minute: '2-digit', second: '2-digit'
+            });
+            // Reset dropdown kota/kabupaten, kecamatan, kelurahan
+            //updateSenderDistricts();
+            //updateReceiverDistricts();
+            // Sembunyikan warning embargo
+            document.getElementById('embargo-warning').classList.add('hidden');
+            document.querySelector('button[onclick="nextPage(\'service\')"]').disabled = false;
+             console.log('end reset');
+        }
+
+
+        // Fungsi untuk mengambil data pesanan dari backend dan menampilkan di tabel laporan
+        async function fetchOrdersAndSummary() {
+            const startDate = document.getElementById('filter-start-date').value;
+            const endDate = document.getElementById('filter-end-date').value;
+            const admin = document.getElementById('filter-admin').value;
+
+            let queryParams = new URLSearchParams();
+            if (startDate) queryParams.append('start_date', startDate);
+            if (endDate) queryParams.append('end_date', endDate);
+            if (admin) queryParams.append('admin_name', admin);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/orders?${queryParams.toString()}`);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch orders: ${response.status}`);
+                }
+                 orders = await response.json();
+
+                // Fetch summary separately (optional, can be combined in one backend endpoint if optimized)
+                const summaryResponse = await fetch(`${API_BASE_URL}/summary?${queryParams.toString()}`);
+                if (!summaryResponse.ok) {
+                    throw new Error(`Failed to fetch summary: ${summaryResponse.status}`);
+                }
+                const summary = await summaryResponse.json();
+
+                renderOrdersTable(orders);
+                updateSummaryCards(summary);
+            } catch (error) {
+                console.error('Error fetching orders or summary:', error);
+                document.getElementById('orders-table').innerHTML = `
+                    <tr>
+                        <td colspan="12" class="border border-gray-300 px-4 py-8 text-center text-red-500">
+                            Gagal memuat data pesanan.
+                        </td>
+                    </tr>
+                `;
+                updateSummaryCards({
+                    total_orders: 0,
+                    total_revenue: 0,
+                    pending_pickup: 0,
+                    total_cash: 0,
+                    total_dfod: 0,
+                    total_cancelled: 0
+                });
+            }
+        }
+
+        // Fungsi untuk menampilkan data di tabel laporan
+        function renderOrdersTable(orders) {
+            const tableBody = document.getElementById('orders-table');
+            tableBody.innerHTML = ''; // Bersihkan tabel
+            if (orders.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="12" class="border border-gray-300 px-4 py-8 text-center text-gray-500">
+                            Belum ada data pesanan yang cocok dengan filter.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            orders.forEach(order => {
+                const row = document.createElement('tr');
+                if (order.status === 'cancelled') {
+                row.classList.add('bg-red-500', 'text-white'); // pakai Tailwind CSS
+}
+                row.innerHTML = `
+                    <td class="border border-gray-300 px-2 py-2">${new Date(order.created_at).toLocaleDateString('id-ID')}</td>
+                    <td class="border border-gray-300 px-2 py-2">${order.receipt_number}</td>
+                    <td class="border border-gray-300 px-2 py-2">${order.admin_name}</td>
+                    <td class="border border-gray-300 px-2 py-2">${order.sender_name}</td>
+                    <td class="border border-gray-300 px-2 py-2">${order.receiver_name}</td>
+                    <td class="border border-gray-300 px-2 py-2">${order.receiver_address}, ${order.receiver_village}, ${order.receiver_district}, ${order.receiver_city}</td>
+                    <td class="border border-gray-300 px-2 py-2">${order.package_content}</td>
+                    <td class="border border-gray-300 px-2 py-2">${order.package_weight.toFixed(2)} kg</td>
+                    <td class="border border-gray-300 px-2 py-2">${order.service_type.toUpperCase()}</td>
+                    <td class="border border-gray-300 px-2 py-2">${order.payment_method.toUpperCase()}</td>
+                    <td class="border border-gray-300 px-2 py-2">Rp ${order.total_shipping_cost.toLocaleString('id-ID')}</td>
+                    <td class="border border-gray-300 px-2 py-2 ">${order.status}</td>
+                    <td class="border border-gray-300 px-2 py-2 relative">
+                        <div class="relative inline-block text-left">
+                            <button onclick="toggleDropdown(this)" class="bg-gray-200 text-gray-800 px-2 py-1 rounded text-xs hover:bg-gray-300">
+                            ⋯
+                            </button>
+                            <div class="hidden absolute right-0 mt-1 w-28 bg-white border border-gray-300 rounded shadow z-10 text-xs" data-dropdown>
+                            <button onclick="reprintReceipt(${order.id}); closeAllDropdowns()" class="w-full text-left px-3 py-2 hover:bg-gray-100">
+                                🖨️ Print
+                            </button>
+                            <button onclick="cancelOrder(${order.id}); closeAllDropdowns()" class="w-full text-left px-3 py-2 hover:bg-gray-100 text-red-600">
+                                ❌ Cancel
+                            </button>
+                            </div>
+                        </div>
+                    </td>
+
+
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Fungsi untuk memperbarui kartu ringkasan
+        function updateSummaryCards(summary) {
+            document.getElementById('total-orders').textContent = summary.total_orders;
+            document.getElementById('total-revenue').textContent = `Rp ${summary.total_revenue.toLocaleString('id-ID')}`;
+            document.getElementById('pending-pickup').textContent = summary.pending_pickup;
+            document.getElementById('total-cash').textContent = `Rp ${summary.total_cash.toLocaleString('id-ID')}`;
+            document.getElementById('total-dfod').textContent = `Rp ${summary.total_dfod.toLocaleString('id-ID')}`;
+            document.getElementById('total-cancelled').textContent = summary.total_cancelled
+        }
+
+        // Fungsi untuk mengisi filter admin secara dinamis (dari data yang ada di DB)
+        async function populateAdminFilter() {
+            const adminSelect = document.getElementById('filter-admin');
+            adminSelect.innerHTML = '<option value="">Semua Admin</option>'; // Reset
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/orders`); // Ambil semua order
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch orders for admin filter: ${response.status}`);
+                }
+                const orders = await response.json();
+                const uniqueAdmins = [...new Set(orders.map(order => order.admin_name))];
+
+                uniqueAdmins.forEach(admin => {
+                    const option = document.createElement('option');
+                    option.value = admin;
+                    option.textContent = admin;
+                    adminSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error populating admin filter:', error);
+            }
+        }
+
+
+        // Fungsi untuk menerapkan filter
+        function applyFilters() {
+            fetchOrdersAndSummary();
+        }
+
+        // Fungsi untuk mereset filter
+        function resetFilters() {
+            document.getElementById('filter-start-date').value = '';
+            document.getElementById('filter-end-date').value = '';
+            document.getElementById('filter-admin').value = '';
+            fetchOrdersAndSummary();
+        }
+
+        async function cancelOrder(id) {
+        if (confirm(`Apakah Anda yakin ingin Cancel ID: ${id}?`)) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/orders/${id}/cancel`, {
+                    method: 'PUT',
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Failed to cancel order: ${response.status} ${errorText}`);
+                }
+
+                const result = await response.json();
+                alert(` ${result.receipt_number} berhasil diubah status menjadi: ${result.status.toUpperCase()}!`);
+                fetchOrdersAndSummary(); // Muat ulang data setelah pembatalan
+            } catch (error) {
+                console.error('Error canceling order:', error);
+                alert('Gagal Cancel. Silakan coba lagi.');
+            }
+        }
+    }
+
+
+     function toggleDropdown(button) {
+        // Tutup semua dropdown lain dulu
+        document.querySelectorAll('[data-dropdown]').forEach(dropdown => {
+        if (!dropdown.contains(button.nextElementSibling)) {
+            dropdown.classList.add('hidden');
+        }
+        });
+
+        // Toggle dropdown yang diklik
+        const dropdown = button.nextElementSibling;
+        dropdown.classList.toggle('hidden');
+    }
+
+    // Tutup dropdown saat klik di luar
+    document.addEventListener('click', function(event) {
+        const isDropdownButton = event.target.closest('button');
+        if (!event.target.closest('[data-dropdown]') && !isDropdownButton) {
+        document.querySelectorAll('[data-dropdown]').forEach(dropdown => {
+            dropdown.classList.add('hidden');
+        });
+        }
+    });
+
+    function closeAllDropdowns() {
+        document.querySelectorAll('[data-dropdown]').forEach(dropdown => {
+        dropdown.classList.add('hidden');
+        });
+    }
+
+    // Tutup dropdown saat klik di luar
+    document.addEventListener('click', function(event) {
+        const isDropdownButton = event.target.closest('button');
+        if (!event.target.closest('[data-dropdown]') && !isDropdownButton) {
+        closeAllDropdowns();
+        }
+    });
+        
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'963c6e88e6e6df9b',t:'MTc1MzI4Njg1Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

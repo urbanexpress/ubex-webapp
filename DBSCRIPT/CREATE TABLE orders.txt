@@ -1,0 +1,44 @@
+CREATE TABLE orders (
+    id SERIAL PRIMARY KEY,
+    receipt_number VARCHAR(255) UNIQUE NOT NULL, 
+    admin_name VARCHAR(255) NOT NULL, 
+
+    sender_name VARCHAR(255) NOT NULL,
+    sender_phone VARCHAR(50) NOT NULL,
+    sender_address TEXT NOT NULL,
+    sender_city VARCHAR(100) NOT NULL,
+    sender_district VARCHAR(100) NOT NULL,
+    sender_village VARCHAR(100) NOT NULL,
+
+    receiver_name VARCHAR(255) NOT NULL,
+    receiver_phone VARCHAR(50) NOT NULL,
+    receiver_address TEXT NOT NULL,
+    receiver_city VARCHAR(100) NOT NULL,
+    receiver_district VARCHAR(100) NOT NULL,
+    receiver_village VARCHAR(100) NOT NULL,
+
+    package_content TEXT NOT NULL,
+    package_weight DECIMAL(10, 2) NOT NULL, 
+    package_length DECIMAL(10, 2), 
+    package_width DECIMAL(10, 2), 
+    package_height DECIMAL(10, 2), 
+    calculated_volume_weight DECIMAL(10, 2), 
+
+    item_value DECIMAL(12, 2) DEFAULT 0, 
+    service_type VARCHAR(50) NOT NULL, 
+    insurance_chosen BOOLEAN DEFAULT FALSE,
+    is_electronic BOOLEAN DEFAULT FALSE,
+    insurance_cost DECIMAL(12, 2) DEFAULT 0,
+    payment_method VARCHAR(50) NOT NULL, 
+    discount DECIMAL(5, 2) DEFAULT 0, 
+    total_shipping_cost DECIMAL(12, 2) NOT NULL,
+
+    status VARCHAR(50) DEFAULT 'pending',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP 
+    
+);
+
+CREATE INDEX idx_receipt_number ON orders (receipt_number);
+CREATE INDEX idx_admin_name ON orders (admin_name);
+CREATE INDEX idx_created_at ON orders (created_at);
+CREATE INDEX idx_order_status ON orders (status);

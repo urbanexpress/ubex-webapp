@@ -1,0 +1,9 @@
+CREATE TABLE receipt_counters (
+    id SERIAL PRIMARY KEY,
+    current_counter BIGINT NOT NULL DEFAULT 0,
+    last_reset_date DATE
+);
+
+INSERT INTO receipt_counters (current_counter, last_reset_date)
+VALUES (0, CURRENT_DATE)
+ON CONFLICT (id) DO NOTHING; 
